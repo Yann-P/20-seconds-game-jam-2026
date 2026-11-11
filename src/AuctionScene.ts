@@ -17,8 +17,8 @@ const BID_THRESHOLD = 1000; // spectators start bidding after this
 const BID_INTERVAL = { min: 1000, max: 1200 };
 // HUD inventory: bought items fill these slots in purchase order
 const HUD_COLUMNS = 3;
-const HUD_ITEM_SIZE = 64;
-const HUD_SLOT_PITCH = 80;
+const HUD_ITEM_SIZE = 115;
+const HUD_SLOT_PITCH = 144;
 
 const NEXT_ITEM_DELAY = 600; // pause after the hammer hits, before the next object
 const ITEM_LIFETIME = 5000; // someone else buys the item after this
@@ -58,11 +58,11 @@ export class AuctionScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const sceneWidth = (width * 2) / 3; // left two thirds; the HUD takes the rest
     this.bar = this.add
-      .rectangle(0, 0, width, 30, 0xcccccc)
-      .setStrokeStyle(1, 0x0000000)
+      .rectangle(0, 0, width, 54, 0xcccccc)
+      .setStrokeStyle(2, 0x0000000)
       .setOrigin(0, 0);
     this.label = this.add
-      .text(8, 15, "", { ...TEXT_STYLE, fontSize: "20px", color: "black" })
+      .text(15, 27, "", { ...TEXT_STYLE, fontSize: "36px", color: "black" })
       .setOrigin(0, 0.5);
     this.timer = this.time.delayedCall(DURATION, () =>
       this.scene.start("results"),
@@ -79,16 +79,16 @@ export class AuctionScene extends Phaser.Scene {
     this.registry.set("purchased", this.purchased);
     this.registry.set("money", this.money);
 
-    this.auctioner = new Auctioner(this, 130, 280);
+    this.auctioner = new Auctioner(this, 250, 504);
 
-    const table = this.add.image(200, 380, "pupitre");
-    table.setScale(0.35);
+    const table = this.add.image(384, 684, "pupitre");
+    table.setScale(0.63);
 
     const rect2 = new Phaser.Geom.Rectangle(
       0,
-      height - 70 - 70,
+      height - 126 - 126,
       sceneWidth,
-      70,
+      126,
     );
     const graphics2 = this.add.graphics({ fillStyle: { color: 0xffffff } });
     graphics2.fillRectShape(rect2);
@@ -99,11 +99,11 @@ export class AuctionScene extends Phaser.Scene {
       const spectator = this.add
         .image(spacing * (i + 1), height, "spectator")
         .setOrigin(0.5, 1)
-        .setScale(Phaser.Math.FloatBetween(0.13, 0.17));
-      spectator.y -= 50;
+        .setScale(Phaser.Math.FloatBetween(0.234, 0.306));
+      spectator.y -= 90;
       const idle = this.tweens.add({
         targets: spectator,
-        y: spectator.y - 12,
+        y: spectator.y - 22,
         duration: Phaser.Math.Between(800, 3600),
         ease: "Sine.easeInOut",
         yoyo: true,
@@ -114,10 +114,10 @@ export class AuctionScene extends Phaser.Scene {
       this.idleTweens.set(spectator, idle);
     }
 
-    const rect = new Phaser.Geom.Rectangle(0, height - 70, sceneWidth, 70);
+    const rect = new Phaser.Geom.Rectangle(0, height - 126, sceneWidth, 126);
     const graphics = this.add.graphics({
       fillStyle: { color: 0xffffff },
-      lineStyle: { color: 0x000000, width: 1 },
+      lineStyle: { color: 0x000000, width: 2 },
     });
     graphics.fillRectShape(rect);
     graphics.strokeRectShape(rect);
@@ -132,20 +132,20 @@ export class AuctionScene extends Phaser.Scene {
       new Button(
         this,
         (sceneWidth * 3) / 4,
-        height - 35,
+        height - 63,
         "YES [Y]",
         pressed(() => this.buy()),
-        { key: "Y", width: 150 },
+        { key: "Y", width: 270 },
       ),
     );
     this.addHint(
       new Button(
         this,
         (sceneWidth * 1) / 4,
-        height - 35,
+        height - 63,
         "NO [N]",
         pressed(() => this.reject()),
-        { key: "N", width: 150 },
+        { key: "N", width: 270 },
       ),
     );
 
@@ -153,24 +153,24 @@ export class AuctionScene extends Phaser.Scene {
     const hudWidth = width - sceneWidth;
     const hudCenter = sceneWidth + hudWidth / 2;
     this.add
-      .rectangle(sceneWidth, 30, hudWidth, height - 30, 0xffffff)
-      .setStrokeStyle(1)
+      .rectangle(sceneWidth, 54, hudWidth, height - 54, 0xffffff)
+      .setStrokeStyle(2)
       .setOrigin(0, 0);
     this.moneyLabel = this.add
-      .text(hudCenter, 70, "", { ...TEXT_STYLE, fontSize: "36px" })
+      .text(hudCenter, 126, "", { ...TEXT_STYLE, fontSize: "65px" })
       .setOrigin(0.5);
     this.refreshMoney();
 
     this.hudCenter = hudCenter;
 
-    const itemDisplayX = 500;
-    const itemDisplayY = 240;
+    const itemDisplayX = 960;
+    const itemDisplayY = 432;
 
     // Object on sale and its price, next to the auctioner
     this.priceLabel = this.add
-      .text(itemDisplayX, itemDisplayY - 100, "", {
+      .text(itemDisplayX, itemDisplayY - 180, "", {
         ...TEXT_STYLE,
-        fontSize: "42px",
+        fontSize: "76px",
       })
       .setOrigin(0.5);
     this.currentItem = this.deck[this.deck.length - 1]; // placeholder until presentNextItem
@@ -178,7 +178,7 @@ export class AuctionScene extends Phaser.Scene {
     this.starsEmitter = this.add.particles(0, 0, "star", {
       x: itemDisplayX,
       y: itemDisplayY,
-      scale: { start: 0, end: 0.2 },
+      scale: { start: 0, end: 0.36 },
       alpha: { start: 0, end: 0.7 },
       lifespan: 2000,
       frequency: 400,
@@ -186,8 +186,8 @@ export class AuctionScene extends Phaser.Scene {
         type: "random",
         source: {
           getRandomPoint: (point: any) => {
-            const minR = 90;
-            const maxR = 110;
+            const minR = 162;
+            const maxR = 198;
             const angle = Math.random() * Math.PI * 2;
             const r = Math.sqrt(
               Math.random() * (maxR * maxR - minR * minR) + minR * minR,
@@ -206,13 +206,13 @@ export class AuctionScene extends Phaser.Scene {
       itemDisplayX,
       itemDisplayY,
       this.currentItem,
-      150,
+      270,
     );
     this.itemRestX = itemDisplayX;
 
     this.tweens.add({
       targets: this.itemDisplay,
-      y: this.itemDisplay.y + 20,
+      y: this.itemDisplay.y + 36,
       duration: 2000,
       ease: "Sine.easeInOut",
       yoyo: true,
@@ -257,7 +257,7 @@ export class AuctionScene extends Phaser.Scene {
 
     // Swipe in from the left while fading in
     this.swipeTween?.stop();
-    this.itemDisplay.setX(this.itemRestX - 100).setAlpha(0);
+    this.itemDisplay.setX(this.itemRestX - 180).setAlpha(0);
     this.swipeTween = this.tweens.add({
       targets: this.itemDisplay,
       x: this.itemRestX,
@@ -356,7 +356,7 @@ export class AuctionScene extends Phaser.Scene {
     const x =
       this.hudCenter +
       ((slot % HUD_COLUMNS) - (HUD_COLUMNS - 1) / 2) * HUD_SLOT_PITCH;
-    const y = 160 + Math.floor(slot / HUD_COLUMNS) * HUD_SLOT_PITCH;
+    const y = 288 + Math.floor(slot / HUD_COLUMNS) * HUD_SLOT_PITCH;
     const bought = new ItemImage(
       this,
       this.itemDisplay.x,
@@ -389,20 +389,20 @@ export class AuctionScene extends Phaser.Scene {
       const text = this.add
         .text(
           spectator.x,
-          spectator.y - spectator.displayHeight - 10,
+          spectator.y - spectator.displayHeight - 18,
           `+${increase}`,
           {
             ...TEXT_STYLE,
-            fontSize: "50px",
+            fontSize: "90px",
             fontStyle: "bold",
             stroke: "#ffffff",
-            strokeThickness: 4,
+            strokeThickness: 7,
           },
         )
         .setOrigin(0.5, 1);
       this.tweens.add({
         targets: text,
-        y: text.y - 30,
+        y: text.y - 54,
         alpha: 0,
         duration: 700,
         ease: "Quad.easeIn",
@@ -423,7 +423,7 @@ export class AuctionScene extends Phaser.Scene {
     this.jumping.add(spectator);
     this.tweens.add({
       targets: spectator,
-      y: spectator.y - 25,
+      y: spectator.y - 45,
       duration: 110,
       ease: "Quad.easeOut",
       yoyo: true,

@@ -73,7 +73,7 @@ export class Auctioner extends Phaser.GameObjects.Container {
 
     this.torsoContainer.sendToBack(this.head);
     this.torsoContainer.sendToBack(this.armLContainer);
-    this.torsoContainer.setScale(0.4);
+    this.torsoContainer.setScale(0.72);
     this.torsoContainer.setX(x).setY(y);
 
     this.scene.tweens.add({
@@ -184,7 +184,7 @@ export class Auctioner extends Phaser.GameObjects.Container {
 
     this.scene.tweens.add({
       targets: [this.torsoContainer],
-      y: this.torsoContainer.y + 5,
+      y: this.torsoContainer.y + 9,
       duration: 70,
       yoyo: true,
     });

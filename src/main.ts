@@ -8,9 +8,9 @@ new Phaser.Game({
   type: Phaser.AUTO,
   scale: {
     parent: "game",
-    width: 1000,
-    height: 600,
-    // Scales the 1000x600 game to fit the screen, keeping its proportions
+    width: 1920,
+    height: 1080,
+    // Scales the 1920x1080 game to fit the screen, keeping its proportions
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
     fullscreenTarget: "game",

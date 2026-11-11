@@ -34,27 +34,27 @@ export class WishlistScene extends Phaser.Scene {
     this.registry.set("wishlist", wishlist);
 
     this.add
-      .text(width / 2, 120, "Buy this at auction!", {
+      .text(width / 2, 216, "Buy this at auction!", {
         ...TEXT_STYLE,
-        fontSize: "40px",
+        fontSize: "72px",
       })
       .setOrigin(0.5);
 
-    const size = 150;
-    const gap = 32;
+    const size = 270;
+    const gap = 58;
     const startX = width / 2 - ((wishlist.length - 1) * (size + gap)) / 2;
     wishlist.forEach((item, i) => {
       const image = new ItemImage(
         this,
         startX + i * (size + gap),
-        280,
+        504,
         item,
         size,
       );
 
       this.tweens.add({
         targets: [image],
-        y: image.y + 20,
+        y: image.y + 36,
         angle: [-2, 2],
         duration: 2000 + i * 1000,
         yoyo: true,
@@ -62,9 +62,9 @@ export class WishlistScene extends Phaser.Scene {
       });
     });
 
-    new Button(this, 1000 / 2, 500, "Go to auction [X]", () => this.startGame(), {
+    new Button(this, 1920 / 2, 900, "Go to auction [X]", () => this.startGame(), {
       key: "X",
-      width: 280,
+      width: 504,
       fireOn: "up",
     });
   }

@@ -32,7 +32,7 @@ export class Button extends Phaser.GameObjects.Container {
     private options: ButtonOptions = {},
   ) {
     super(scene, x, y);
-    const { key, width = 150, tint, fontSize = 22 } = options;
+    const { key, width = 270, tint, fontSize = 40 } = options;
 
     // Bottom-anchored so the up and down arts (different heights) share the same base line.
     this.image = new Phaser.GameObjects.Image(scene, 0, 0, "UI_button_up");

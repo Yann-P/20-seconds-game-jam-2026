@@ -8,7 +8,7 @@ export class LoadingScene extends Phaser.Scene {
 
   preload() {
     const { width, height } = this.scale;
-    const bar = this.add.rectangle(width / 2, height / 2, 0, 30, 0xffffff);
+    const bar = this.add.rectangle(width / 2, height / 2, 0, 54, 0xffffff);
     this.load.on("progress", (value: number) => {
       bar.width = width * 0.6 * value;
     });

@@ -10,7 +10,7 @@ export class ItemImage extends Phaser.GameObjects.Image {
     x: number,
     y: number,
     item: Item,
-    size = 64,
+    size = 115,
   ) {
     super(scene, x, y, item.texture);
     this.boxSize = size;
