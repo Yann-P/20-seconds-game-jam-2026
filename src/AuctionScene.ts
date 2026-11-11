@@ -326,8 +326,20 @@ export class AuctionScene extends Phaser.Scene {
     if (this.finished || this.waitingForNext) return;
     if (this.money < this.price) {
       // Can't afford it: flash the money
-      this.moneyLabel.setColor("#dd0000");
-      this.time.delayedCall(200, () => this.moneyLabel.setColor("#000000"));
+      this.moneyLabel.setColor("#ff0000");
+
+      this.tweens.add({
+        targets: [this.moneyLabel],
+        color: "#dd00000",
+        duration: 300,
+        scale: 2,
+        ease: "Quad.easeInOut",
+        yoyo: true,
+        onComplete: () => {
+          this.moneyLabel.setColor("#000000");
+        },
+      });
+
       return;
     }
     this.money -= this.price;
