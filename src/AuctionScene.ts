@@ -19,6 +19,7 @@ const HUD_COLUMNS = 3;
 const HUD_ITEM_SIZE = 64;
 const HUD_SLOT_PITCH = 80;
 
+const NEXT_ITEM_DELAY = 600; // pause after the hammer hits, before the next object
 const ITEM_LIFETIME = 5000; // someone else buys the item after this
 
 export class AuctionScene extends Phaser.Scene {
@@ -36,6 +37,7 @@ export class AuctionScene extends Phaser.Scene {
   private itemRestX = 0;
   private deck: Item[] = [];
   private finished = false;
+  private waitingForNext = false;
   private lastBidder?: Phaser.GameObjects.Image;
   private swipeTween?: Phaser.Tweens.Tween;
   private hudCenter = 0;
@@ -70,6 +72,7 @@ export class AuctionScene extends Phaser.Scene {
     this.purchased = [];
     this.deck = shuffledItems();
     this.finished = false;
+    this.waitingForNext = false;
     this.idleTweens.clear();
     this.jumping.clear();
     this.registry.set("purchased", this.purchased);
@@ -282,13 +285,27 @@ export class AuctionScene extends Phaser.Scene {
     this.lostEvent = this.time.delayedCall(ITEM_LIFETIME, () => {
       this.auctioner.play("sold");
       this.flyItemToSpectator();
+      this.presentNextItemAfterHammer();
+    });
+  }
+
+  /** After a sale (to the player or a spectator): short pause on the hammer hit before the next object. */
+  private presentNextItemAfterHammer() {
+    this.bidEvent?.remove();
+    this.lostEvent?.remove();
+    this.waitingForNext = true; // yes/no are ignored meanwhile
+    // The sold object is gone from the stand: a copy of it is flying to its buyer.
+    this.swipeTween?.stop();
+    this.itemDisplay.setAlpha(0);
+    this.time.delayedCall(NEXT_ITEM_DELAY, () => {
+      this.waitingForNext = false;
       this.presentNextItem();
     });
   }
 
   /** The player says no: a copy of the item is tossed away, spinning, and falls off screen. */
   private reject() {
-    if (this.finished) return;
+    if (this.finished || this.waitingForNext) return;
     this.presentNextItem();
   }
 
@@ -314,7 +331,7 @@ export class AuctionScene extends Phaser.Scene {
   }
 
   private buy() {
-    if (this.finished) return;
+    if (this.finished || this.waitingForNext) return;
     if (this.money < this.price) {
       // Can't afford it: flash the money
       this.moneyLabel.setColor("#dd0000");
@@ -327,7 +344,7 @@ export class AuctionScene extends Phaser.Scene {
     this.flyItemToInventory(this.currentItem, this.purchased.length - 1);
     this.registry.set("money", this.money);
     this.refreshMoney();
-    this.presentNextItem();
+    this.presentNextItemAfterHammer();
   }
 
   /** The bought item flies from the auction to the next free inventory slot in the HUD. */
