@@ -159,15 +159,15 @@ export class Auctioner extends Phaser.GameObjects.Container {
   }
 
   private coupDeMarteau() {
-    this.scene.cameras.main.shake(200, 0.01);
-
     this.scene.tweens.killTweensOf(this.armRContainer);
     this.scene.tweens.killTweensOf(this.forearmRContainer);
     this.scene.tweens.killTweensOf(this.torsoContainer);
 
-    // TODO PEAUFINER
-
     const delay = 70;
+
+    this.scene.time.delayedCall(100, () =>
+      this.scene.cameras.main.shake(100, 0.01),
+    );
 
     // marteau qui tombe
     this.scene.tweens.add({

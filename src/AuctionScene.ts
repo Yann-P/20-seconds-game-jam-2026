@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { COLLECTIONS, ITEMS, randomItem, type Item } from "./items";
+import { shuffledItems, type Item } from "./items";
 import { ItemImage } from "./ItemImage";
 import { Auctioner } from "./Auctioner";
 import { TEXT_STYLE } from "./consts";
@@ -11,9 +11,14 @@ const SPECTATOR_COUNT = 8;
 // opening price, so hesitating (bids) or a wrong purchase is what makes you fall short.
 const START_MONEY = 600;
 const OPENING_PRICE = { min: 100, max: 200 };
-const BID_INCREASE = { min: 10, max: 40 };
+const BID_INCREASE = { min: 10, max: 10 };
 const BID_THRESHOLD = 800; // spectators start bidding after this
 const BID_INTERVAL = { min: 500, max: 1200 };
+// HUD inventory: bought items fill these slots in purchase order
+const HUD_COLUMNS = 3;
+const HUD_ITEM_SIZE = 64;
+const HUD_SLOT_PITCH = 80;
+
 const ITEM_LIFETIME = 5000; // someone else buys the item after this
 
 export class AuctionScene extends Phaser.Scene {
@@ -29,8 +34,11 @@ export class AuctionScene extends Phaser.Scene {
   private idleTweens = new Map<Phaser.GameObjects.Image, Phaser.Tweens.Tween>();
   private jumping = new Set<Phaser.GameObjects.Image>();
   private itemRestX = 0;
+  private deck: Item[] = [];
+  private finished = false;
+  private lastBidder?: Phaser.GameObjects.Image;
   private swipeTween?: Phaser.Tweens.Tween;
-  private hudItems = new Map<Item, ItemImage>();
+  private hudCenter = 0;
   private stopHints: (() => void)[] = [];
   private timer!: Phaser.Time.TimerEvent;
   private bar!: Phaser.GameObjects.Rectangle;
@@ -60,14 +68,16 @@ export class AuctionScene extends Phaser.Scene {
     // The scene instance is reused between games: reset state here.
     this.money = START_MONEY;
     this.purchased = [];
+    this.deck = shuffledItems();
+    this.finished = false;
     this.idleTweens.clear();
     this.jumping.clear();
     this.registry.set("purchased", this.purchased);
     this.registry.set("money", this.money);
 
-    this.auctioner = new Auctioner(this, 170, 280);
+    this.auctioner = new Auctioner(this, 130, 280);
 
-    const table = this.add.image(200, 400, "table");
+    const table = this.add.image(200, 380, "pupitre");
     table.setScale(0.35);
 
     const rect2 = new Phaser.Geom.Rectangle(
@@ -101,8 +111,12 @@ export class AuctionScene extends Phaser.Scene {
     }
 
     const rect = new Phaser.Geom.Rectangle(0, height - 70, sceneWidth, 70);
-    const graphics = this.add.graphics({ fillStyle: { color: 0xffffff } });
+    const graphics = this.add.graphics({
+      fillStyle: { color: 0xffffff },
+      lineStyle: { color: 0x000000, width: 1 },
+    });
     graphics.fillRectShape(rect);
+    graphics.strokeRectShape(rect);
 
     const yes = this.add
       .image((sceneWidth * 1) / 4, height - 30, "yes")
@@ -114,51 +128,33 @@ export class AuctionScene extends Phaser.Scene {
       .setTint(0xffbbbb);
     this.stopHints = [];
     this.bindButton(yes, "Y", () => this.buy());
-    this.bindButton(no, "N", () => this.presentNextItem());
+    this.bindButton(no, "N", () => this.reject());
 
-    // HUD (right third, full height below the timer): money, then every collection
+    // HUD (right third, full height below the timer): money, then the bought items
     const hudWidth = width - sceneWidth;
     const hudCenter = sceneWidth + hudWidth / 2;
     this.add
-      .rectangle(sceneWidth, 30, hudWidth, height - 30, 0xeeeeee)
+      .rectangle(sceneWidth, 30, hudWidth, height - 30, 0xffffff)
+      .setStrokeStyle(1)
       .setOrigin(0, 0);
     this.moneyLabel = this.add
       .text(hudCenter, 70, "", { ...TEXT_STYLE, fontSize: "36px" })
       .setOrigin(0.5);
     this.refreshMoney();
 
-    // One row per collection; items are hidden until bought.
-    // Sized so that the largest collection still fits in the HUD width.
-    const hudItemGap = 10;
-    const largest = Math.max(...COLLECTIONS.map((c) => c.count));
-    const hudItemSize = Math.min(
-      64,
-      (hudWidth - 24 - (largest - 1) * hudItemGap) / largest,
-    );
-    const hudRowPitch = hudItemSize + 16;
-    this.hudItems.clear();
-    COLLECTIONS.forEach((collection, row) => {
-      const items = ITEMS.filter((item) => item.collection === collection);
-      const startX =
-        hudCenter - ((items.length - 1) * (hudItemSize + hudItemGap)) / 2;
-      items.forEach((item, col) => {
-        const x = startX + col * (hudItemSize + hudItemGap);
-        const y = 160 + row * hudRowPitch;
-        this.hudItems.set(
-          item,
-          new ItemImage(this, x, y, item, hudItemSize).setVisible(false),
-        );
-      });
-    });
-
-    // Object on sale and its price, next to the auctioner
-    this.priceLabel = this.add
-      .text(410, 150, "", { ...TEXT_STYLE, fontSize: "32px" })
-      .setOrigin(0.5);
-    this.currentItem = randomItem();
+    this.hudCenter = hudCenter;
 
     const itemDisplayX = 500;
     const itemDisplayY = 240;
+
+    // Object on sale and its price, next to the auctioner
+    this.priceLabel = this.add
+      .text(itemDisplayX, itemDisplayY - 150, "", {
+        ...TEXT_STYLE,
+        fontSize: "42px",
+      })
+      .setOrigin(0.5);
+    this.currentItem = this.deck[this.deck.length - 1]; // placeholder until presentNextItem
 
     this.starsEmitter = this.add.particles(0, 0, "star", {
       x: itemDisplayX,
@@ -166,13 +162,13 @@ export class AuctionScene extends Phaser.Scene {
       scale: { start: 0, end: 0.2 },
       alpha: { start: 0, end: 1 },
       lifespan: 2000,
-      frequency: 500,
+      frequency: 400,
       emitZone: {
         type: "random",
         source: {
           getRandomPoint: (point: any) => {
-            const minR = 80;
-            const maxR = 100;
+            const minR = 90;
+            const maxR = 110;
             const angle = Math.random() * Math.PI * 2;
             const r = Math.sqrt(
               Math.random() * (maxR * maxR - minR * minR) + minR * minR,
@@ -252,7 +248,16 @@ export class AuctionScene extends Phaser.Scene {
     this.bidEvent?.remove();
     this.lostEvent?.remove();
 
-    this.currentItem = randomItem();
+    // Each object is auctioned only once: when none is left, the auction ends early.
+    const next = this.deck.pop();
+    if (!next) {
+      this.finished = true;
+      this.itemDisplay.setVisible(false);
+      this.priceLabel.setVisible(false);
+      this.time.delayedCall(700, () => this.scene.start("results"));
+      return;
+    }
+    this.currentItem = next;
     this.itemDisplay.setItem(this.currentItem);
 
     // Swipe in from the left while fading in
@@ -272,13 +277,44 @@ export class AuctionScene extends Phaser.Scene {
     this.bidEvent = this.time.delayedCall(BID_THRESHOLD, () =>
       this.spectatorBid(),
     );
-    // Someone else buys it: no visual cue, on purpose.
-    this.lostEvent = this.time.delayedCall(ITEM_LIFETIME, () =>
-      this.presentNextItem(),
-    );
+    // Someone else buys it: no warning before it happens, on purpose.
+    this.lastBidder = undefined;
+    this.lostEvent = this.time.delayedCall(ITEM_LIFETIME, () => {
+      this.auctioner.play("sold");
+      this.flyItemToSpectator();
+      this.presentNextItem();
+    });
+  }
+
+  /** The player says no: a copy of the item is tossed away, spinning, and falls off screen. */
+  private reject() {
+    if (this.finished) return;
+    this.presentNextItem();
+  }
+
+  /** A spectator (the last bidder) wins: a copy of the item flies to them, shrinking to nothing. */
+  private flyItemToSpectator() {
+    const buyer =
+      this.lastBidder ?? Phaser.Utils.Array.GetRandom(this.spectators);
+    const flying = new ItemImage(
+      this,
+      this.itemDisplay.x,
+      this.itemDisplay.y,
+      this.currentItem,
+    ).setScale(this.itemDisplay.scale);
+    this.tweens.add({
+      targets: flying,
+      x: buyer.x,
+      y: buyer.y,
+      scale: 0,
+      duration: 450,
+      ease: "Quad.easeIn",
+      onComplete: () => flying.destroy(),
+    });
   }
 
   private buy() {
+    if (this.finished) return;
     if (this.money < this.price) {
       // Can't afford it: flash the money
       this.moneyLabel.setColor("#dd0000");
@@ -288,30 +324,34 @@ export class AuctionScene extends Phaser.Scene {
     this.money -= this.price;
     this.purchased.push(this.currentItem);
     this.auctioner.play("sold");
-    this.highlightAcquired(this.currentItem);
+    this.flyItemToInventory(this.currentItem, this.purchased.length - 1);
     this.registry.set("money", this.money);
     this.refreshMoney();
     this.presentNextItem();
   }
 
-  /** Makes the bought item obvious in the HUD: opaque, big pop, and an expanding ring. */
-  private highlightAcquired(item: Item) {
-    const hudItem = this.hudItems.get(item);
-    if (!hudItem) return;
-    hudItem.setVisible(true);
-    this.children.bringToTop(hudItem);
-
-    const baseScale = hudItem.fitScale;
-    this.tweens.killTweensOf(hudItem);
-    hudItem.setScale(baseScale).setAngle(0);
+  /** The bought item flies from the auction to the next free inventory slot in the HUD. */
+  private flyItemToInventory(item: Item, slot: number) {
+    const x =
+      this.hudCenter +
+      ((slot % HUD_COLUMNS) - (HUD_COLUMNS - 1) / 2) * HUD_SLOT_PITCH;
+    const y = 160 + Math.floor(slot / HUD_COLUMNS) * HUD_SLOT_PITCH;
+    const bought = new ItemImage(
+      this,
+      this.itemDisplay.x,
+      this.itemDisplay.y,
+      item,
+      HUD_ITEM_SIZE,
+    );
+    const restScale = bought.fitScale;
+    bought.setScale(this.itemDisplay.scale);
     this.tweens.add({
-      targets: hudItem,
-      scale: baseScale * 3,
-      angle: 12,
-      duration: 160,
-      ease: "Back.easeOut",
-      yoyo: true,
-      hold: 80,
+      targets: bought,
+      x,
+      y,
+      scale: restScale,
+      duration: 450,
+      ease: "Quad.easeInOut",
     });
   }
 
@@ -322,6 +362,7 @@ export class AuctionScene extends Phaser.Scene {
     const available = this.spectators.filter((s) => !this.jumping.has(s));
     if (available.length > 0) {
       const spectator = Phaser.Utils.Array.GetRandom(available);
+      this.lastBidder = spectator;
       this.jump(spectator);
 
       const text = this.add

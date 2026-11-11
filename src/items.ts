@@ -36,7 +36,7 @@ export function pickWishlist(): Item[] {
   return Phaser.Utils.Array.Shuffle([...ITEMS]).slice(0, WISHLIST_SIZE);
 }
 
-/** Independent random pick: duplicates across calls are expected. */
-export function randomItem(): Item {
-  return Phaser.Utils.Array.GetRandom(ITEMS);
+/** Every item exactly once, in random order. */
+export function shuffledItems(): Item[] {
+  return Phaser.Utils.Array.Shuffle([...ITEMS]);
 }

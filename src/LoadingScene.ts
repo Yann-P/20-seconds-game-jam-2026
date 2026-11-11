@@ -25,7 +25,7 @@ export class LoadingScene extends Phaser.Scene {
     this.load.image("yes", "yes.png");
     this.load.image("no", "no.png");
     this.load.image("star", "star.png");
-    this.load.image("table", "table.png");
+    this.load.image("pupitre", "pupitre.png");
     this.load.image("table2", "table2.png");
     for (const item of ITEMS) {
       this.load.image(item.texture, `${item.texture}.png`);
