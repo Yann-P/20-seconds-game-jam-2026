@@ -131,7 +131,7 @@ export class AuctionScene extends Phaser.Scene {
     this.addHint(
       new Button(
         this,
-        (sceneWidth * 1) / 4,
+        (sceneWidth * 3) / 4,
         height - 35,
         "YES [Y]",
         pressed(() => this.buy()),
@@ -141,7 +141,7 @@ export class AuctionScene extends Phaser.Scene {
     this.addHint(
       new Button(
         this,
-        (sceneWidth * 3) / 4,
+        (sceneWidth * 1) / 4,
         height - 35,
         "NO [N]",
         pressed(() => this.reject()),

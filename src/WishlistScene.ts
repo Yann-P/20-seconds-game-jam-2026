@@ -10,7 +10,22 @@ export class WishlistScene extends Phaser.Scene {
   }
 
   private startGame() {
+    this.requestFullscreenOnMobile();
     this.scene.start("auction");
+  }
+
+  /** Must run from a user gesture (the start button). Not supported on iPhone Safari. */
+  private requestFullscreenOnMobile() {
+    if (this.sys.game.device.os.desktop) return;
+    if (!this.scale.fullscreen.available || this.scale.isFullscreen) return;
+    // The game is landscape: once fullscreen, rotate with it where the browser allows (Android).
+    this.scale.once(Phaser.Scale.Events.ENTER_FULLSCREEN, () => {
+      const orientation = screen.orientation as ScreenOrientation & {
+        lock?: (orientation: string) => Promise<void>;
+      };
+      orientation.lock?.("landscape").catch(() => {});
+    });
+    this.scale.startFullscreen();
   }
 
   create() {
