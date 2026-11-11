@@ -328,10 +328,14 @@ export class AuctionScene extends Phaser.Scene {
       // Can't afford it: flash the money
       this.moneyLabel.setColor("#ff0000");
 
+      // Restart from the resting size: otherwise a new press mid-animation
+      // takes the enlarged size as its starting point and ends up stuck there.
+      this.tweens.killTweensOf(this.moneyLabel);
+      this.moneyLabel.setScale(1);
       this.tweens.add({
         targets: [this.moneyLabel],
         color: "#dd00000",
-        duration: 300,
+        duration: 100,
         scale: 2,
         ease: "Quad.easeInOut",
         yoyo: true,
