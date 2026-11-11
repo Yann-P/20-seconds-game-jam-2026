@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import type { Item } from "./items";
-import { PlaceholderItem } from "./PlaceholderItem";
+import { ItemImage } from "./ItemImage";
+import { TEXT_STYLE } from "./consts";
 
 export class ResultsScene extends Phaser.Scene {
   constructor() {
@@ -20,26 +21,26 @@ export class ResultsScene extends Phaser.Scene {
       const x = startX + i * (size + gap);
       const got = purchased.includes(item);
       if (got) bought++;
-      new PlaceholderItem(this, x, 200, item, size);
+      new ItemImage(this, x, 200, item, size);
       this.add
         .text(x, 290, got ? "yes" : "no", {
+          ...TEXT_STYLE,
           fontSize: "28px",
-          color: "#ffffff",
         })
         .setOrigin(0.5);
     });
 
     this.add
       .text(width / 2, 380, `${bought} objects / ${wishlist.length}`, {
+        ...TEXT_STYLE,
         fontSize: "32px",
-        color: "#ffffff",
       })
       .setOrigin(0.5);
 
     this.add
       .text(400, 500, "Back to wishlist", {
+        ...TEXT_STYLE,
         fontSize: "32px",
-        color: "#ffffff",
       })
       .setOrigin(0.5)
       .setInteractive()

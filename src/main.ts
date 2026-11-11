@@ -8,6 +8,8 @@ new Phaser.Game({
   type: Phaser.AUTO,
   width: 1000,
   height: 600,
-  backgroundColor: "#333",
+  backgroundColor: "#fff",
   scene: [LoadingScene, WishlistScene, AuctionScene, ResultsScene],
+  antialias: true,
+  roundPixels: true,
 });

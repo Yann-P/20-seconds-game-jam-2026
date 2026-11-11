@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { ITEMS } from "./items";
 
 export class LoadingScene extends Phaser.Scene {
   constructor() {
@@ -22,8 +23,12 @@ export class LoadingScene extends Phaser.Scene {
     this.load.image("spectator", "spectator.png");
     this.load.image("yes", "yes.png");
     this.load.image("no", "no.png");
+    this.load.image("star", "star.png");
     this.load.image("table", "table.png");
     this.load.image("table2", "table2.png");
+    for (const item of ITEMS) {
+      this.load.image(item.texture, `${item.texture}.png`);
+    }
   }
 
   create() {

@@ -1,16 +1,19 @@
 import Phaser from "phaser";
 import { COLLECTIONS, ITEMS, randomItem, type Item } from "./items";
-import { PlaceholderItem } from "./PlaceholderItem";
+import { ItemImage } from "./ItemImage";
 import { Auctioner } from "./Auctioner";
+import { TEXT_STYLE } from "./consts";
 
 const DURATION = 20000;
 const SPECTATOR_COUNT = 8;
 
-const START_MONEY = 1000;
-const OPENING_PRICE = { min: 80, max: 250 };
+// Balance: 3 items to find. The budget covers 3 purchases even at the highest
+// opening price, so hesitating (bids) or a wrong purchase is what makes you fall short.
+const START_MONEY = 600;
+const OPENING_PRICE = { min: 100, max: 200 };
 const BID_INCREASE = { min: 10, max: 40 };
 const BID_THRESHOLD = 800; // spectators start bidding after this
-const BID_INTERVAL = { min: 300, max: 900 };
+const BID_INTERVAL = { min: 500, max: 1200 };
 const ITEM_LIFETIME = 5000; // someone else buys the item after this
 
 export class AuctionScene extends Phaser.Scene {
@@ -18,14 +21,14 @@ export class AuctionScene extends Phaser.Scene {
   private price = 0;
   private currentItem!: Item;
   private purchased: Item[] = [];
-  private itemDisplay!: PlaceholderItem;
+  private itemDisplay!: ItemImage;
   private priceLabel!: Phaser.GameObjects.Text;
   private moneyLabel!: Phaser.GameObjects.Text;
   private bidEvent?: Phaser.Time.TimerEvent;
   private lostEvent?: Phaser.Time.TimerEvent;
   private idleTweens = new Map<Phaser.GameObjects.Image, Phaser.Tweens.Tween>();
   private jumping = new Set<Phaser.GameObjects.Image>();
-  private hudItems = new Map<Item, PlaceholderItem>();
+  private hudItems = new Map<Item, ItemImage>();
   private stopHints: (() => void)[] = [];
   private timer!: Phaser.Time.TimerEvent;
   private bar!: Phaser.GameObjects.Rectangle;
@@ -42,7 +45,7 @@ export class AuctionScene extends Phaser.Scene {
     const sceneWidth = (width * 2) / 3; // left two thirds; the HUD takes the rest
     this.bar = this.add.rectangle(0, 0, width, 30, 0xffffff).setOrigin(0, 0);
     this.label = this.add
-      .text(8, 15, "", { fontSize: "20px", color: "#000000" })
+      .text(8, 15, "", { ...TEXT_STYLE, fontSize: "20px" })
       .setOrigin(0, 0.5);
     this.timer = this.time.delayedCall(DURATION, () =>
       this.scene.start("results"),
@@ -111,17 +114,22 @@ export class AuctionScene extends Phaser.Scene {
     const hudWidth = width - sceneWidth;
     const hudCenter = sceneWidth + hudWidth / 2;
     this.add
-      .rectangle(sceneWidth, 30, hudWidth, height - 30, 0x12121f)
+      .rectangle(sceneWidth, 30, hudWidth, height - 30, 0xeeeeee)
       .setOrigin(0, 0);
     this.moneyLabel = this.add
-      .text(hudCenter, 70, "", { fontSize: "36px", color: "#ffffff" })
+      .text(hudCenter, 70, "", { ...TEXT_STYLE, fontSize: "36px" })
       .setOrigin(0.5);
     this.refreshMoney();
 
     // One row per collection; items stay half transparent until bought.
-    const hudItemSize = 34;
-    const hudItemGap = 8;
-    const hudRowPitch = 56;
+    // Sized so that the largest collection still fits in the HUD width.
+    const hudItemGap = 10;
+    const largest = Math.max(...COLLECTIONS.map((c) => c.count));
+    const hudItemSize = Math.min(
+      64,
+      (hudWidth - 24 - (largest - 1) * hudItemGap) / largest,
+    );
+    const hudRowPitch = hudItemSize + 16;
     this.hudItems.clear();
     COLLECTIONS.forEach((collection, row) => {
       const items = ITEMS.filter((item) => item.collection === collection);
@@ -129,26 +137,30 @@ export class AuctionScene extends Phaser.Scene {
         hudCenter - ((items.length - 1) * (hudItemSize + hudItemGap)) / 2;
       items.forEach((item, col) => {
         const x = startX + col * (hudItemSize + hudItemGap);
-        const y = 150 + row * hudRowPitch;
+        const y = 160 + row * hudRowPitch;
         this.hudItems.set(
           item,
-          new PlaceholderItem(this, x, y, item, hudItemSize).setAlpha(0.5),
+          new ItemImage(this, x, y, item, hudItemSize).setAlpha(0.5),
         );
       });
     });
 
     // Object on sale and its price, next to the auctioner
     this.priceLabel = this.add
-      .text(410, 150, "", { fontSize: "32px", color: "#ffffff" })
+      .text(410, 150, "", { ...TEXT_STYLE, fontSize: "32px" })
       .setOrigin(0.5);
     this.currentItem = randomItem();
-    this.itemDisplay = new PlaceholderItem(
-      this,
-      410,
-      240,
-      this.currentItem,
-      96,
-    );
+    this.itemDisplay = new ItemImage(this, 500, 240, this.currentItem, 128);
+
+    this.tweens.add({
+      targets: this.itemDisplay,
+      y: this.itemDisplay.y + 20,
+      duration: 2000,
+      ease: "Sine.easeInOut",
+      yoyo: true,
+      repeat: -1,
+    });
+
     this.presentNextItem();
   }
 
@@ -213,17 +225,38 @@ export class AuctionScene extends Phaser.Scene {
   private buy() {
     if (this.money < this.price) {
       // Can't afford it: flash the money
-      this.moneyLabel.setColor("#ff5555");
-      this.time.delayedCall(200, () => this.moneyLabel.setColor("#ffffff"));
+      this.moneyLabel.setColor("#dd0000");
+      this.time.delayedCall(200, () => this.moneyLabel.setColor("#000000"));
       return;
     }
     this.money -= this.price;
     this.purchased.push(this.currentItem);
     this.auctioner.play("sold");
-    this.hudItems.get(this.currentItem)?.setAlpha(1);
+    this.highlightAcquired(this.currentItem);
     this.registry.set("money", this.money);
     this.refreshMoney();
     this.presentNextItem();
+  }
+
+  /** Makes the bought item obvious in the HUD: opaque, big pop, and an expanding ring. */
+  private highlightAcquired(item: Item) {
+    const hudItem = this.hudItems.get(item);
+    if (!hudItem) return;
+    hudItem.setAlpha(1);
+    this.children.bringToTop(hudItem);
+
+    const baseScale = hudItem.fitScale;
+    this.tweens.killTweensOf(hudItem);
+    hudItem.setScale(baseScale).setAngle(0);
+    this.tweens.add({
+      targets: hudItem,
+      scale: baseScale * 3,
+      angle: 12,
+      duration: 160,
+      ease: "Back.easeOut",
+      yoyo: true,
+      hold: 80,
+    });
   }
 
   private spectatorBid() {
@@ -242,10 +275,10 @@ export class AuctionScene extends Phaser.Scene {
           spectator.y - spectator.displayHeight - 10,
           `+${increase}`,
           {
-            fontSize: "24px",
+            ...TEXT_STYLE,
+            fontSize: "50px",
             fontStyle: "bold",
-            color: "#ffe066",
-            stroke: "#000000",
+            stroke: "#ffffff",
             strokeThickness: 4,
           },
         )

@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { pickWishlist } from "./items";
-import { PlaceholderItem } from "./PlaceholderItem";
+import { ItemImage } from "./ItemImage";
+import { TEXT_STYLE } from "./consts";
 
 export class WishlistScene extends Phaser.Scene {
   constructor() {
@@ -17,25 +18,25 @@ export class WishlistScene extends Phaser.Scene {
     this.registry.set("wishlist", wishlist);
 
     this.add
-      .text(width / 2, 120, "Shopping list", {
+      .text(width / 2, 120, "Buy this at auction!", {
+        ...TEXT_STYLE,
         fontSize: "40px",
-        color: "#ffffff",
       })
       .setOrigin(0.5);
 
-    const size = 96;
+    const size = 128;
     const gap = 32;
     const startX = width / 2 - ((wishlist.length - 1) * (size + gap)) / 2;
     wishlist.forEach((item, i) => {
-      new PlaceholderItem(this, startX + i * (size + gap), 280, item, size);
+      new ItemImage(this, startX + i * (size + gap), 280, item, size);
     });
 
     this.input.keyboard?.on(`keydown-X`, () => this.startGame());
 
     this.add
-      .text(400, 500, "Go to auction [X]", {
+      .text(1000 / 2, 500, "Go to auction [X]", {
+        ...TEXT_STYLE,
         fontSize: "32px",
-        color: "#ffffff",
       })
       .setOrigin(0.5)
       .setInteractive()

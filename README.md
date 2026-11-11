@@ -11,7 +11,7 @@ Each game is 20 seconds.
 The flow is as follows:
 
 - a "start game" screen
-  - shows the player a "shopping list" of 5 items picked randomly among the collections.
+  - shows the player a "shopping list" of 3 items picked randomly among the collections.
   - requires the player to click a button to play
 
   The tricky bit of the game is that collection items sometimes look alike.
