@@ -10,12 +10,19 @@ export type AuctionerAnimation = "present" | "bid" | "sold";
 export class Auctioner extends Phaser.GameObjects.Container {
   private torso!: Phaser.GameObjects.Image;
   private head!: Phaser.GameObjects.Image;
+
   private armL!: Phaser.GameObjects.Image;
-  private armR!: Phaser.GameObjects.Image;
   private forearmL!: Phaser.GameObjects.Image;
-  private forearmR!: Phaser.GameObjects.Image;
+
+  private armLContainer!: Phaser.GameObjects.Container;
+  private forearmLContainer!: Phaser.GameObjects.Container;
+
   private torsoContainer!: Phaser.GameObjects.Container;
+
+  private armR!: Phaser.GameObjects.Image;
   private armRContainer!: Phaser.GameObjects.Container;
+
+  private forearmR!: Phaser.GameObjects.Image;
   private forearmRContainer!: Phaser.GameObjects.Container;
 
   // Placeholder animations: replace with the real ones.
@@ -32,27 +39,42 @@ export class Auctioner extends Phaser.GameObjects.Container {
     super(scene, x, y);
 
     this.torso = this.part(0, 0, "character_torso").setOrigin(0.5, 0.8);
+
     this.armR = this.part(0, 0, "character_arm_R").setOrigin(0.5, -0.1);
     this.forearmR = this.part(0, 0, "character_forearm_R").setOrigin(0.1, 0.5);
     this.forearmRContainer = this.scene.add.container(
       0,
       this.armR.height + 40,
       [this.forearmR],
-    ); // elbow = end of upper sprite
+    );
     this.armRContainer = this.scene.add.container(-160, -250, [
       this.armR,
       this.forearmRContainer,
     ]);
 
-    const head = this.part(0, -340, "character_head");
+    this.armL = this.part(0, 0, "character_arm_L").setOrigin(0.5, 0.1);
+    this.forearmL = this.part(0, 0, "character_forearm_L").setOrigin(0.1, 1);
+    this.forearmLContainer = this.scene.add.container(50, 240, [this.forearmL]); // elbow = end of upper sprite
+    this.armLContainer = this.scene.add.container(210, -240, [
+      this.armL,
+      this.forearmLContainer,
+    ]);
+
+    this.armLContainer.sendToBack(this.forearmLContainer);
+
+    this.head = this.part(0, -400, "character_head");
+    //head.setZ(0);
 
     this.torsoContainer = this.scene.add.container(200, 200, [
       this.torso,
-      head,
+      this.head,
       this.armRContainer,
+      this.armLContainer,
     ]);
 
-    this.torsoContainer.setScale(0.5); // scales B, C and D together
+    this.torsoContainer.sendToBack(this.head);
+    this.torsoContainer.sendToBack(this.armLContainer);
+    this.torsoContainer.setScale(0.5);
     this.torsoContainer.setX(x).setY(y);
 
     this.scene.tweens.add({
@@ -64,9 +86,25 @@ export class Auctioner extends Phaser.GameObjects.Container {
     });
 
     this.scene.tweens.add({
-      targets: [head],
-      angle: [-5, 5],
+      targets: [this.head],
+      angle: [-10, 5],
       duration: 10000,
+      repeat: -1,
+      yoyo: true,
+    });
+
+    this.scene.tweens.add({
+      targets: [this.armLContainer],
+      angle: -30,
+      duration: 2000,
+      repeat: -1,
+      yoyo: true,
+    });
+
+    this.scene.tweens.add({
+      targets: [this.forearmLContainer],
+      angle: [-10, 10],
+      duration: 1000,
       repeat: -1,
       yoyo: true,
     });
@@ -102,7 +140,7 @@ export class Auctioner extends Phaser.GameObjects.Container {
     this.scene.tweens.add({
       targets: [this.armRContainer],
       angle: 10,
-      duration: 200,
+      duration: 300,
       ease: "Phaser.Easing.Quintic.InOut",
       // repeat: -1,
       yoyo: true,
@@ -111,7 +149,7 @@ export class Auctioner extends Phaser.GameObjects.Container {
     this.scene.tweens.add({
       targets: [this.forearmRContainer],
       angle: -30,
-      duration: 200,
+      duration: 300,
       ease: "Phaser.Easing.Quintic.InOut",
       // repeat: -1,
       yoyo: true,
