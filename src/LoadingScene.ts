@@ -26,6 +26,9 @@ export class LoadingScene extends Phaser.Scene {
     this.load.image("no", "no.png");
     this.load.image("star", "star.png");
     this.load.image("pupitre", "pupitre.png");
+    this.load.image("UI_button_up", "UI_button_up.png");
+    this.load.image("UI_button_down", "UI_button_down.png");
+    this.load.image("UI_start", "UI_start.png");
     for (const item of ITEMS) {
       this.load.image(item.texture, `${item.texture}.png`);
     }
@@ -33,6 +36,5 @@ export class LoadingScene extends Phaser.Scene {
 
   create() {
     this.scene.start("wishlist");
-    // this.scene.start('auction');
   }
 }

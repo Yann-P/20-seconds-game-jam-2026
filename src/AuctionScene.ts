@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { shuffledItems, type Item } from "./items";
 import { ItemImage } from "./ItemImage";
 import { Auctioner } from "./Auctioner";
+import { Button } from "./Button";
 import { TEXT_STYLE } from "./consts";
 
 const DURATION = 20000;
@@ -12,8 +13,8 @@ const SPECTATOR_COUNT = 8;
 const START_MONEY = 600;
 const OPENING_PRICE = { min: 100, max: 200 };
 const BID_INCREASE = { min: 10, max: 10 };
-const BID_THRESHOLD = 800; // spectators start bidding after this
-const BID_INTERVAL = { min: 500, max: 1200 };
+const BID_THRESHOLD = 1000; // spectators start bidding after this
+const BID_INTERVAL = { min: 1000, max: 1200 };
 // HUD inventory: bought items fill these slots in purchase order
 const HUD_COLUMNS = 3;
 const HUD_ITEM_SIZE = 64;
@@ -121,17 +122,32 @@ export class AuctionScene extends Phaser.Scene {
     graphics.fillRectShape(rect);
     graphics.strokeRectShape(rect);
 
-    const yes = this.add
-      .image((sceneWidth * 1) / 4, height - 30, "yes")
-      .setScale(0.2)
-      .setTint(0xbbffbb);
-    const no = this.add
-      .image((sceneWidth * 3) / 4, height - 30, "no")
-      .setScale(0.2)
-      .setTint(0xffbbbb);
     this.stopHints = [];
-    this.bindButton(yes, "Y", () => this.buy());
-    this.bindButton(no, "N", () => this.reject());
+    const pressed = (action: () => void) => () => {
+      this.stopHints.forEach((stop) => stop());
+      this.stopHints = [];
+      action();
+    };
+    this.addHint(
+      new Button(
+        this,
+        (sceneWidth * 1) / 4,
+        height - 35,
+        "YES [Y]",
+        pressed(() => this.buy()),
+        { key: "Y", width: 150 },
+      ),
+    );
+    this.addHint(
+      new Button(
+        this,
+        (sceneWidth * 3) / 4,
+        height - 35,
+        "NO [N]",
+        pressed(() => this.reject()),
+        { key: "N", width: 150 },
+      ),
+    );
 
     // HUD (right third, full height below the timer): money, then the bought items
     const hudWidth = width - sceneWidth;
@@ -152,7 +168,7 @@ export class AuctionScene extends Phaser.Scene {
 
     // Object on sale and its price, next to the auctioner
     this.priceLabel = this.add
-      .text(itemDisplayX, itemDisplayY - 150, "", {
+      .text(itemDisplayX, itemDisplayY - 100, "", {
         ...TEXT_STYLE,
         fontSize: "42px",
       })
@@ -163,7 +179,7 @@ export class AuctionScene extends Phaser.Scene {
       x: itemDisplayX,
       y: itemDisplayY,
       scale: { start: 0, end: 0.2 },
-      alpha: { start: 0, end: 1 },
+      alpha: { start: 0, end: 0.7 },
       lifespan: 2000,
       frequency: 400,
       emitZone: {
@@ -206,18 +222,11 @@ export class AuctionScene extends Phaser.Scene {
     this.presentNextItem();
   }
 
-  /** Triggers the action on click or on the given key, with a quick zoom on the button. */
-  private bindButton(
-    button: Phaser.GameObjects.Image,
-    key: string,
-    action: () => void,
-  ) {
-    const baseScale = button.scale;
-
-    // Pulse until the player presses either button for the first time.
+  /** Pulses the button until the player presses either button for the first time. */
+  private addHint(button: Button) {
     const hint = this.tweens.add({
       targets: button,
-      scale: baseScale * 1.15,
+      scale: 1.15,
       duration: 350,
       ease: "Sine.easeInOut",
       yoyo: true,
@@ -225,25 +234,8 @@ export class AuctionScene extends Phaser.Scene {
     });
     this.stopHints.push(() => {
       hint.stop();
-      button.setScale(baseScale);
+      button.setScale(1);
     });
-
-    const press = () => {
-      this.stopHints.forEach((stop) => stop());
-      this.stopHints = [];
-      this.tweens.killTweensOf(button);
-      button.setScale(baseScale);
-      this.tweens.add({
-        targets: button,
-        scale: baseScale * 1.25,
-        duration: 70,
-        ease: "Quad.easeOut",
-        yoyo: true,
-      });
-      action();
-    };
-    button.setInteractive({ useHandCursor: true }).on("pointerdown", press);
-    this.input.keyboard?.on(`keydown-${key}`, press);
   }
 
   private presentNextItem() {

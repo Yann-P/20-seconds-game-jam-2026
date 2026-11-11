@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { pickWishlist } from "./items";
 import { ItemImage } from "./ItemImage";
 import { TEXT_STYLE } from "./consts";
+import { Button } from "./Button";
 
 export class WishlistScene extends Phaser.Scene {
   constructor() {
@@ -24,22 +25,32 @@ export class WishlistScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    const size = 128;
+    const size = 150;
     const gap = 32;
     const startX = width / 2 - ((wishlist.length - 1) * (size + gap)) / 2;
     wishlist.forEach((item, i) => {
-      new ItemImage(this, startX + i * (size + gap), 280, item, size);
+      const image = new ItemImage(
+        this,
+        startX + i * (size + gap),
+        280,
+        item,
+        size,
+      );
+
+      this.tweens.add({
+        targets: [image],
+        y: image.y + 20,
+        angle: [-2, 2],
+        duration: 2000 + i * 1000,
+        yoyo: true,
+        repeat: -1,
+      });
     });
 
-    this.input.keyboard?.on(`keydown-X`, () => this.startGame());
-
-    this.add
-      .text(1000 / 2, 500, "Go to auction [X]", {
-        ...TEXT_STYLE,
-        fontSize: "32px",
-      })
-      .setOrigin(0.5)
-      .setInteractive()
-      .on("pointerdown", () => this.startGame());
+    new Button(this, 1000 / 2, 500, "Go to auction [X]", () => this.startGame(), {
+      key: "X",
+      width: 280,
+      fireOn: "up",
+    });
   }
 }

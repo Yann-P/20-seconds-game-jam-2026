@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import type { Item } from "./items";
 import { ItemImage } from "./ItemImage";
 import { TEXT_STYLE } from "./consts";
+import { Button } from "./Button";
 
 export class ResultsScene extends Phaser.Scene {
   constructor() {
@@ -37,16 +38,11 @@ export class ResultsScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    this.input.keyboard?.on(`keydown-X`, () => this.replay());
-
-    this.add
-      .text(500, 500, "Back to wishlist [X]", {
-        ...TEXT_STYLE,
-        fontSize: "32px",
-      })
-      .setOrigin(0.5)
-      .setInteractive()
-      .on("pointerdown", () => this.replay());
+    new Button(this, 500, 500, "Back to wishlist [X]", () => this.replay(), {
+      key: "X",
+      width: 300,
+      fireOn: "up",
+    });
   }
 
   private replay() {

@@ -78,7 +78,7 @@ export class Auctioner extends Phaser.GameObjects.Container {
 
     this.scene.tweens.add({
       targets: [this.torsoContainer],
-      angle: [-7, 5],
+      angle: [0, 3],
       duration: 3000,
       repeat: -1,
       yoyo: true,
@@ -115,7 +115,7 @@ export class Auctioner extends Phaser.GameObjects.Container {
     this.scene.tweens.killTweensOf(this.armLContainer);
     this.scene.tweens.killTweensOf(this.forearmLContainer);
 
-    const delay = 100;
+    const delay = 200;
 
     // pointe du bras
     this.scene.tweens.add({
@@ -134,17 +134,17 @@ export class Auctioner extends Phaser.GameObjects.Container {
     this.scene.tweens.add({
       targets: [this.armLContainer],
       angle: 0,
-      duration: 300,
+      duration: 400,
       ease: "Quad.easeOut",
-      delay,
+      delay: delay + 300,
     });
 
     this.scene.tweens.add({
       targets: [this.forearmLContainer],
       angle: 0,
-      duration: 300,
+      duration: 400,
       ease: "Quad.easeOut",
-      delay,
+      delay: delay + 270,
     });
   }
 
@@ -166,7 +166,7 @@ export class Auctioner extends Phaser.GameObjects.Container {
     const delay = 70;
 
     this.scene.time.delayedCall(100, () =>
-      this.scene.cameras.main.shake(100, 0.01),
+      this.scene.cameras.main.shake(200, 0.01),
     );
 
     // marteau qui tombe
@@ -202,14 +202,14 @@ export class Auctioner extends Phaser.GameObjects.Container {
       targets: [this.armRContainer],
       angle: 0,
       duration: 300,
-      delay,
+      delay: delay + 200,
     });
 
     this.scene.tweens.add({
       targets: [this.forearmRContainer],
       angle: -30,
       duration: 300,
-      delay,
+      delay: delay + 200,
     });
 
     // this.scene.tweens.killTweensOf(target);
