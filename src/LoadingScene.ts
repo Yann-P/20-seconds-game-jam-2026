@@ -12,8 +12,9 @@ export class LoadingScene extends Phaser.Scene {
     this.load.on("progress", (value: number) => {
       bar.width = width * 0.6 * value;
     });
-
     this.load.setPath("assets");
+    this.load.font("whitrabt", "whitrabt.ttf", "truetype");
+
     this.load.image("character_torso", "character_torso.png");
     this.load.image("character_head", "character_head.png");
     this.load.image("character_arm_L", "character_arm_L.png");

@@ -4,7 +4,7 @@ import Phaser from "phaser";
  * Animations the scene can trigger with `auctioner.play(name)`.
  * To add one: add its name here and its implementation in `animations` below.
  */
-export type AuctionerAnimation = "present" | "bid" | "sold";
+export type AuctionerAnimation = "present" | "sold";
 
 /** The auctioner: a container of body parts, positioned relative to the container. */
 export class Auctioner extends Phaser.GameObjects.Container {
@@ -27,12 +27,8 @@ export class Auctioner extends Phaser.GameObjects.Container {
 
   // Placeholder animations: replace with the real ones.
   private animations: Record<AuctionerAnimation, () => void> = {
-    // A new object is put on sale
-    present: () => {}, // this.swing(this.forearmR, -15, 120),
-    // A spectator placed a bid
-    bid: () => this.coupDeMarteau(),
-    // The player bought the object
-    sold: () => {}, // this.swing(this, -6, 100),
+    present: () => this.presentObject(),
+    sold: () => this.coupDeMarteau(),
   };
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
@@ -47,10 +43,13 @@ export class Auctioner extends Phaser.GameObjects.Container {
       this.armR.height + 40,
       [this.forearmR],
     );
+
     this.armRContainer = this.scene.add.container(-160, -250, [
       this.armR,
       this.forearmRContainer,
     ]);
+
+    this.forearmRContainer.setAngle(-30);
 
     this.armL = this.part(0, 0, "character_arm_L").setOrigin(0.5, 0.1);
     this.forearmL = this.part(0, 0, "character_forearm_L").setOrigin(0.1, 1);
@@ -62,7 +61,7 @@ export class Auctioner extends Phaser.GameObjects.Container {
 
     this.armLContainer.sendToBack(this.forearmLContainer);
 
-    this.head = this.part(0, -400, "character_head");
+    this.head = this.part(-10, -420, "character_head");
     //head.setZ(0);
 
     this.torsoContainer = this.scene.add.container(200, 200, [
@@ -93,29 +92,60 @@ export class Auctioner extends Phaser.GameObjects.Container {
       yoyo: true,
     });
 
+    // this.scene.tweens.add({
+    //   targets: [this.armLContainer],
+    //   angle: -30,
+    //   duration: 5000,
+    //   repeat: -1,
+    //   yoyo: true,
+    // });
+
+    // this.scene.tweens.add({
+    //   targets: [this.forearmLContainer],
+    //   angle: [-10, 10],
+    //   duration: 2000,
+    //   repeat: -1,
+    //   yoyo: true,
+    // });
+
+    scene.add.existing(this);
+  }
+
+  private presentObject() {
+    this.scene.tweens.killTweensOf(this.armLContainer);
+    this.scene.tweens.killTweensOf(this.forearmLContainer);
+
+    const delay = 100;
+
+    // pointe du bras
     this.scene.tweens.add({
       targets: [this.armLContainer],
-      angle: -30,
-      duration: 2000,
-      repeat: -1,
-      yoyo: true,
+      angle: -10,
+      duration: delay,
     });
 
     this.scene.tweens.add({
       targets: [this.forearmLContainer],
-      angle: [-10, 10],
-      duration: 1000,
-      repeat: -1,
-      yoyo: true,
+      angle: 30,
+      duration: delay,
     });
 
-    // Parts in draw order (later ones are on top). Positions are placeholders.
-    // this.armL = this.part(0, 0, "character_arm_L");
-    //this.torso = this.part(0, 0, "character_torso");
-    // this.head = this.part(0, 0, "character_head");
-    // this.forearmL = this.part(0, 0, "character_forearm_L");
+    // remonte le bras
+    this.scene.tweens.add({
+      targets: [this.armLContainer],
+      angle: 0,
+      duration: 300,
+      ease: "Quad.easeOut",
+      delay,
+    });
 
-    scene.add.existing(this);
+    this.scene.tweens.add({
+      targets: [this.forearmLContainer],
+      angle: 0,
+      duration: 300,
+      ease: "Quad.easeOut",
+      delay,
+    });
   }
 
   play(animation: AuctionerAnimation) {
@@ -129,30 +159,57 @@ export class Auctioner extends Phaser.GameObjects.Container {
   }
 
   private coupDeMarteau() {
+    this.scene.cameras.main.shake(200, 0.01);
+
     this.scene.tweens.killTweensOf(this.armRContainer);
     this.scene.tweens.killTweensOf(this.forearmRContainer);
-
-    this.armRContainer.setAngle(0);
-    this.forearmRContainer.setAngle(0);
+    this.scene.tweens.killTweensOf(this.torsoContainer);
 
     // TODO PEAUFINER
 
+    const delay = 70;
+
+    // marteau qui tombe
     this.scene.tweens.add({
       targets: [this.armRContainer],
       angle: 10,
-      duration: 300,
-      ease: "Phaser.Easing.Quintic.InOut",
-      // repeat: -1,
+      duration: delay,
+    });
+
+    this.scene.tweens.add({
+      targets: [this.forearmRContainer],
+      angle: -10,
+      duration: delay,
+    });
+
+    this.scene.tweens.add({
+      targets: [this.torsoContainer],
+      y: this.torsoContainer.y + 5,
+      duration: 70,
       yoyo: true,
+    });
+
+    this.scene.tweens.add({
+      targets: [this.head],
+      angle: 5,
+      duration: 70,
+      yoyo: true,
+    });
+
+    // marteau qui remonte
+
+    this.scene.tweens.add({
+      targets: [this.armRContainer],
+      angle: 0,
+      duration: 300,
+      delay,
     });
 
     this.scene.tweens.add({
       targets: [this.forearmRContainer],
       angle: -30,
       duration: 300,
-      ease: "Phaser.Easing.Quintic.InOut",
-      // repeat: -1,
-      yoyo: true,
+      delay,
     });
 
     // this.scene.tweens.killTweensOf(target);

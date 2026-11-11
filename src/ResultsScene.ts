@@ -37,13 +37,19 @@ export class ResultsScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
+    this.input.keyboard?.on(`keydown-X`, () => this.replay());
+
     this.add
-      .text(400, 500, "Back to wishlist", {
+      .text(500, 500, "Back to wishlist [X]", {
         ...TEXT_STYLE,
         fontSize: "32px",
       })
       .setOrigin(0.5)
       .setInteractive()
-      .on("pointerdown", () => this.scene.start("wishlist"));
+      .on("pointerdown", () => this.replay());
+  }
+
+  private replay() {
+    this.scene.start("wishlist");
   }
 }

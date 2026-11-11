@@ -1,4 +1,4 @@
 export const TEXT_STYLE = {
-  fontFamily: "Roboto, sans-serif",
+  fontFamily: "whitrabt, sans-serif",
   color: "#0000000",
 };
