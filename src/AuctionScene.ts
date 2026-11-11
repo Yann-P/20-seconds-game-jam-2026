@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { COLLECTIONS, ITEMS, randomItem, type Item } from "./items";
 import { PlaceholderItem } from "./PlaceholderItem";
+import { Auctioner } from "./Auctioner";
 
 const DURATION = 20000;
 const SPECTATOR_COUNT = 8;
@@ -25,11 +26,12 @@ export class AuctionScene extends Phaser.Scene {
   private idleTweens = new Map<Phaser.GameObjects.Image, Phaser.Tweens.Tween>();
   private jumping = new Set<Phaser.GameObjects.Image>();
   private hudItems = new Map<Item, PlaceholderItem>();
+  private stopHints: (() => void)[] = [];
   private timer!: Phaser.Time.TimerEvent;
   private bar!: Phaser.GameObjects.Rectangle;
   private label!: Phaser.GameObjects.Text;
   private spectators: Phaser.GameObjects.Image[] = [];
-  private auctioner!: Phaser.GameObjects.Image;
+  private auctioner!: Auctioner;
 
   constructor() {
     super("auction");
@@ -54,17 +56,7 @@ export class AuctionScene extends Phaser.Scene {
     this.registry.set("purchased", this.purchased);
     this.registry.set("money", this.money);
 
-    this.auctioner = this.add.image(170, 180, "auctioner");
-    this.auctioner.setScale(0.2);
-
-    this.tweens.add({
-      targets: this.auctioner,
-      angle: this.auctioner.angle - 5,
-      duration: Phaser.Math.Between(1800, 5600),
-      ease: "Sine.easeInOut",
-      yoyo: true,
-      repeat: -1,
-    });
+    this.auctioner = new Auctioner(this, 170, 270);
 
     const table = this.add.image(200, 400, "table");
     table.setScale(0.35);
@@ -111,6 +103,7 @@ export class AuctionScene extends Phaser.Scene {
       .image((sceneWidth * 3) / 4, height - 30, "no")
       .setScale(0.2)
       .setTint(0xffbbbb);
+    this.stopHints = [];
     this.bindButton(yes, "Y", () => this.buy());
     this.bindButton(no, "N", () => this.presentNextItem());
 
@@ -166,7 +159,24 @@ export class AuctionScene extends Phaser.Scene {
     action: () => void,
   ) {
     const baseScale = button.scale;
+
+    // Pulse until the player presses either button for the first time.
+    const hint = this.tweens.add({
+      targets: button,
+      scale: baseScale * 1.15,
+      duration: 350,
+      ease: "Sine.easeInOut",
+      yoyo: true,
+      repeat: -1,
+    });
+    this.stopHints.push(() => {
+      hint.stop();
+      button.setScale(baseScale);
+    });
+
     const press = () => {
+      this.stopHints.forEach((stop) => stop());
+      this.stopHints = [];
       this.tweens.killTweensOf(button);
       button.setScale(baseScale);
       this.tweens.add({
@@ -188,6 +198,7 @@ export class AuctionScene extends Phaser.Scene {
 
     this.currentItem = randomItem();
     this.itemDisplay.setItem(this.currentItem);
+    this.auctioner.play("present");
     this.setPrice(Phaser.Math.Between(OPENING_PRICE.min, OPENING_PRICE.max));
 
     this.bidEvent = this.time.delayedCall(BID_THRESHOLD, () =>
@@ -208,6 +219,7 @@ export class AuctionScene extends Phaser.Scene {
     }
     this.money -= this.price;
     this.purchased.push(this.currentItem);
+    this.auctioner.play("sold");
     this.hudItems.get(this.currentItem)?.setAlpha(1);
     this.registry.set("money", this.money);
     this.refreshMoney();
@@ -217,6 +229,7 @@ export class AuctionScene extends Phaser.Scene {
   private spectatorBid() {
     const increase = Phaser.Math.Between(BID_INCREASE.min, BID_INCREASE.max);
     this.setPrice(this.price + increase);
+    this.auctioner.play("bid");
 
     const available = this.spectators.filter((s) => !this.jumping.has(s));
     if (available.length > 0) {

@@ -8,6 +8,6 @@ new Phaser.Game({
   type: Phaser.AUTO,
   width: 1000,
   height: 600,
-  backgroundColor: "#1d1d2e",
+  backgroundColor: "#333",
   scene: [LoadingScene, WishlistScene, AuctionScene, ResultsScene],
 });

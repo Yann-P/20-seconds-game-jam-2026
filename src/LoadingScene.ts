@@ -13,11 +13,17 @@ export class LoadingScene extends Phaser.Scene {
     });
 
     this.load.setPath("assets");
-    this.load.image("auctioner", "auctioner.png");
+    this.load.image("character_torso", "character_torso.png");
+    this.load.image("character_head", "character_head.png");
+    this.load.image("character_arm_L", "character_arm_L.png");
+    this.load.image("character_arm_R", "character_arm_R.png");
+    this.load.image("character_forearm_L", "character_forearm_L.png");
+    this.load.image("character_forearm_R", "character_forearm_R.png");
     this.load.image("spectator", "spectator.png");
     this.load.image("yes", "yes.png");
     this.load.image("no", "no.png");
     this.load.image("table", "table.png");
+    this.load.image("table2", "table2.png");
   }
 
   create() {

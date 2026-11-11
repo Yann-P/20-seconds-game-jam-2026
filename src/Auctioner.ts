@@ -1,0 +1,130 @@
+import Phaser from "phaser";
+
+/**
+ * Animations the scene can trigger with `auctioner.play(name)`.
+ * To add one: add its name here and its implementation in `animations` below.
+ */
+export type AuctionerAnimation = "present" | "bid" | "sold";
+
+/** The auctioner: a container of body parts, positioned relative to the container. */
+export class Auctioner extends Phaser.GameObjects.Container {
+  private torso!: Phaser.GameObjects.Image;
+  private head!: Phaser.GameObjects.Image;
+  private armL!: Phaser.GameObjects.Image;
+  private armR!: Phaser.GameObjects.Image;
+  private forearmL!: Phaser.GameObjects.Image;
+  private forearmR!: Phaser.GameObjects.Image;
+  private torsoContainer!: Phaser.GameObjects.Container;
+  private armRContainer!: Phaser.GameObjects.Container;
+  private forearmRContainer!: Phaser.GameObjects.Container;
+
+  // Placeholder animations: replace with the real ones.
+  private animations: Record<AuctionerAnimation, () => void> = {
+    // A new object is put on sale
+    present: () => {}, // this.swing(this.forearmR, -15, 120),
+    // A spectator placed a bid
+    bid: () => this.coupDeMarteau(),
+    // The player bought the object
+    sold: () => {}, // this.swing(this, -6, 100),
+  };
+
+  constructor(scene: Phaser.Scene, x: number, y: number) {
+    super(scene, x, y);
+
+    this.torso = this.part(0, 0, "character_torso").setOrigin(0.5, 0.8);
+    this.armR = this.part(0, 0, "character_arm_R").setOrigin(0.5, -0.1);
+    this.forearmR = this.part(0, 0, "character_forearm_R").setOrigin(0.1, 0.5);
+    this.forearmRContainer = this.scene.add.container(
+      0,
+      this.armR.height + 40,
+      [this.forearmR],
+    ); // elbow = end of upper sprite
+    this.armRContainer = this.scene.add.container(-160, -250, [
+      this.armR,
+      this.forearmRContainer,
+    ]);
+
+    const head = this.part(0, -340, "character_head");
+
+    this.torsoContainer = this.scene.add.container(200, 200, [
+      this.torso,
+      head,
+      this.armRContainer,
+    ]);
+
+    this.torsoContainer.setScale(0.5); // scales B, C and D together
+    this.torsoContainer.setX(x).setY(y);
+
+    this.scene.tweens.add({
+      targets: [this.torsoContainer],
+      angle: [-7, 5],
+      duration: 3000,
+      repeat: -1,
+      yoyo: true,
+    });
+
+    this.scene.tweens.add({
+      targets: [head],
+      angle: [-5, 5],
+      duration: 10000,
+      repeat: -1,
+      yoyo: true,
+    });
+
+    // Parts in draw order (later ones are on top). Positions are placeholders.
+    // this.armL = this.part(0, 0, "character_arm_L");
+    //this.torso = this.part(0, 0, "character_torso");
+    // this.head = this.part(0, 0, "character_head");
+    // this.forearmL = this.part(0, 0, "character_forearm_L");
+
+    scene.add.existing(this);
+  }
+
+  play(animation: AuctionerAnimation) {
+    this.animations[animation]();
+  }
+
+  private part(x: number, y: number, texture: string) {
+    const image = new Phaser.GameObjects.Image(this.scene, x, y, texture);
+    this.add(image);
+    return image;
+  }
+
+  private coupDeMarteau() {
+    this.scene.tweens.killTweensOf(this.armRContainer);
+    this.scene.tweens.killTweensOf(this.forearmRContainer);
+
+    this.armRContainer.setAngle(0);
+    this.forearmRContainer.setAngle(0);
+
+    // TODO PEAUFINER
+
+    this.scene.tweens.add({
+      targets: [this.armRContainer],
+      angle: 10,
+      duration: 200,
+      ease: "Phaser.Easing.Quintic.InOut",
+      // repeat: -1,
+      yoyo: true,
+    });
+
+    this.scene.tweens.add({
+      targets: [this.forearmRContainer],
+      angle: -30,
+      duration: 200,
+      ease: "Phaser.Easing.Quintic.InOut",
+      // repeat: -1,
+      yoyo: true,
+    });
+
+    // this.scene.tweens.killTweensOf(target);
+    // target.setAngle(0);
+    // this.scene.tweens.add({
+    //   targets: target,
+    //   angle,
+    //   duration,
+    //   ease: "Quad.easeOut",
+    //   yoyo: true,
+    // });
+  }
+}
