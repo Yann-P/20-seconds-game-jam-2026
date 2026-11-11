@@ -16,10 +16,18 @@
         overflow: hidden;
         overscroll-behavior: none;
       }
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
       #game {
         width: 100vw;
         height: 100vh;
         height: 100dvh; /* excludes mobile browser bars */
+        /* Never larger than the native 1920x1080: on big screens it sits centred at that size */
+        max-width: 1920px;
+        max-height: 1080px;
       }
       canvas {
         touch-action: none;

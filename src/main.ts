@@ -10,7 +10,7 @@ new Phaser.Game({
     parent: "game",
     width: 1920,
     height: 1080,
-    // Scales the 1920x1080 game to fit the screen, keeping its proportions
+    // Shrinks the 1920x1080 game to fit its container (capped at native size in index.html)
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
     fullscreenTarget: "game",
