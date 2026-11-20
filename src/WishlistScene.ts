@@ -32,21 +32,24 @@ export class WishlistScene extends Phaser.Scene {
     const { width } = this.scale;
     const wishlist = pickWishlist();
     this.registry.set("wishlist", wishlist);
+    this.registry.set("npcid", Phaser.Math.Between(1, 9));
 
     const ui = this.add.image(
       this.scale.width / 2,
       this.scale.height / 2,
       "UI_start2",
     );
+    ui.setScale(1.9);
 
-    ui.setScale(1.6);
+    const npc = this.add.image(500, 300, "NPC_" + this.registry.get("npcid"));
+    npc.setScale(0.8);
 
     this.add
-      .text(width / 2, 216, "Buy this at auction!", {
+      .text(npc.x + 160, npc.y, "Buy this for me!", {
         ...TEXT_STYLE,
-        fontSize: "72px",
+        fontSize: "90px",
       })
-      .setOrigin(0.5);
+      .setOrigin(0, 0.5);
 
     const size = 270;
     const gap = 58;
@@ -55,7 +58,7 @@ export class WishlistScene extends Phaser.Scene {
       const image = new ItemImage(
         this,
         startX + i * (size + gap),
-        504,
+        570,
         item,
         size,
       );
@@ -72,13 +75,15 @@ export class WishlistScene extends Phaser.Scene {
 
     new Button(
       this,
-      1920 / 2,
-      900,
-      "Go to auction [X]",
+      1920 - 530,
+      1080 - 230,
+      "OK",
+      "press x",
+      "green",
       () => this.startGame(),
       {
         key: "X",
-        width: 504,
+        //width: 504,
         fireOn: "up",
       },
     );

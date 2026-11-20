@@ -38,11 +38,20 @@ export class ResultsScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    new Button(this, 960, 900, "Back to wishlist [X]", () => this.replay(), {
-      key: "X",
-      width: 540,
-      fireOn: "up",
-    });
+    new Button(
+      this,
+      960,
+      900,
+      "Back to wishlist",
+      "press x",
+      "green",
+      () => this.replay(),
+      {
+        key: "X",
+        width: 540,
+        fireOn: "up",
+      },
+    );
   }
 
   private replay() {

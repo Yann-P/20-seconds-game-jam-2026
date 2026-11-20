@@ -32,11 +32,13 @@ export class Auctioner extends Phaser.GameObjects.Container {
   };
 
   private thumpSound!: Phaser.Sound.BaseSound;
+  private wooshSound!: Phaser.Sound.BaseSound;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y);
 
     this.thumpSound = this.scene.sound.add("thump");
+    this.wooshSound = this.scene.sound.add("woosh");
 
     this.torso = this.part(0, 0, "character_torso").setOrigin(0.5, 0.8);
 
@@ -77,13 +79,14 @@ export class Auctioner extends Phaser.GameObjects.Container {
 
     this.torsoContainer.sendToBack(this.head);
     this.torsoContainer.sendToBack(this.armLContainer);
-    this.torsoContainer.setScale(0.72);
+    this.torsoContainer.setScale(0.65);
     this.torsoContainer.setX(x).setY(y);
 
     this.scene.tweens.add({
       targets: [this.torsoContainer],
       angle: [0, 3],
-      duration: 3000,
+      duration: 5000,
+      ease: Phaser.Math.Easing.Quintic.InOut,
       repeat: -1,
       yoyo: true,
     });
@@ -100,6 +103,9 @@ export class Auctioner extends Phaser.GameObjects.Container {
   }
 
   private presentObject() {
+    this.wooshSound.play({
+      volume: 0.2,
+    });
     this.scene.tweens.killTweensOf(this.armLContainer);
     this.scene.tweens.killTweensOf(this.forearmLContainer);
 
@@ -149,7 +155,7 @@ export class Auctioner extends Phaser.GameObjects.Container {
   private coupDeMarteau() {
     this.scene.tweens.killTweensOf(this.armRContainer);
     this.scene.tweens.killTweensOf(this.forearmRContainer);
-    this.scene.tweens.killTweensOf(this.torsoContainer);
+    //this.scene.tweens.killTweensOf(this.torsoContainer);
 
     const delay = 70;
 

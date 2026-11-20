@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { TEXT_STYLE } from "./consts";
+import { COLORS, TEXT_STYLE } from "./consts";
 
 // Vertical centre of the button's top face, in texture pixels above the image's bottom edge.
 const FACE_CENTER_UP = 98;
@@ -20,22 +20,35 @@ export interface ButtonOptions {
 export class Button extends Phaser.GameObjects.Container {
   private image: Phaser.GameObjects.Image;
   private label: Phaser.GameObjects.Text;
+  private hintLabel: Phaser.GameObjects.Text;
   private artScale: number;
   private isDown = false;
+  private variant = "";
+  private clickSound!: Phaser.Sound.BaseSound;
 
   constructor(
     scene: Phaser.Scene,
     x: number,
     y: number,
     text: string,
+    hint: string = "",
+    variant: "green" | "pink" = "green",
     private action: () => void,
     private options: ButtonOptions = {},
   ) {
     super(scene, x, y);
+    this.variant = variant;
+    this.clickSound = this.scene.sound.add("click");
+
     const { key, width = 270, tint, fontSize = 40 } = options;
 
     // Bottom-anchored so the up and down arts (different heights) share the same base line.
-    this.image = new Phaser.GameObjects.Image(scene, 0, 0, "UI_button_up");
+    this.image = new Phaser.GameObjects.Image(
+      scene,
+      0,
+      0,
+      "UI_button_up_" + variant,
+    );
     this.artScale = width / this.image.width;
     this.image.setScale(this.artScale).setOrigin(0.5, 1);
     this.image.y = this.image.displayHeight / 2;
@@ -44,16 +57,28 @@ export class Button extends Phaser.GameObjects.Container {
     this.label = new Phaser.GameObjects.Text(scene, 0, 0, text, {
       ...TEXT_STYLE,
       fontSize: `${fontSize}px`,
-    }).setOrigin(0.5);
+      color: COLORS.pinkpurple.hexString,
+    }).setOrigin(0.5, 1);
 
-    this.add([this.image, this.label]);
+    this.label.setStroke(COLORS.pinkpurple.hexString, 2);
+
+    this.hintLabel = new Phaser.GameObjects.Text(scene, 0, 0, hint, {
+      ...TEXT_STYLE,
+      fontSize: `${(fontSize * 2) / 3}px`,
+      color:
+        variant === "green" ? COLORS.pink.hexString : COLORS.cyan.hexString,
+    }).setOrigin(0.5, 0);
+
+    this.add([this.image, this.label, this.hintLabel]);
     this.release(false);
 
     this.image
       .setInteractive({ useHandCursor: true })
       .on("pointerdown", () => this.press())
       .on("pointerup", () => this.release(true))
-      .on("pointerout", () => this.release(false));
+      .on("pointerout", () => {
+        this.release(false);
+      });
 
     if (key) {
       scene.input.keyboard?.on(`keydown-${key}`, (event: KeyboardEvent) => {
@@ -67,9 +92,11 @@ export class Button extends Phaser.GameObjects.Container {
 
   private press() {
     if (this.isDown) return;
+    this.clickSound.play({ volume: 0.5 });
     this.isDown = true;
-    this.image.setTexture("UI_button_down");
+    this.image.setTexture("UI_button_down_" + this.variant);
     this.label.y = this.image.y - FACE_CENTER_DOWN * this.artScale;
+    this.hintLabel.y = this.image.y - FACE_CENTER_DOWN * this.artScale;
     if (this.options.fireOn !== "up") this.action();
   }
 
@@ -77,8 +104,10 @@ export class Button extends Phaser.GameObjects.Container {
   private release(activated: boolean) {
     const wasDown = this.isDown;
     this.isDown = false;
-    this.image.setTexture("UI_button_up");
+    this.image.setTexture("UI_button_up_" + this.variant);
     this.label.y = this.image.y - FACE_CENTER_UP * this.artScale;
+    this.hintLabel.y = this.image.y - FACE_CENTER_UP * this.artScale;
+
     if (wasDown && activated && this.options.fireOn === "up") this.action();
   }
 }

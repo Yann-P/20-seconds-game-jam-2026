@@ -6,18 +6,16 @@ import { Button } from "./Button";
 import { COLORS, TEXT_STYLE, TIMER_HEIGHT } from "./consts";
 
 const DURATION = 20000;
-const SPECTATOR_COUNT = 8;
+const SPECTATOR_COUNT = 6;
 
-// Balance: 3 items to find. The budget covers 3 purchases even at the highest
-// opening price, so hesitating (bids) or a wrong purchase is what makes you fall short.
-const START_MONEY = 600;
+const START_MONEY = 1000;
 const OPENING_PRICE = { min: 100, max: 200 };
 const BID_INCREASE = { min: 10, max: 10 };
-const BID_THRESHOLD = 1000; // spectators start bidding after this
+const BID_THRESHOLD = 1000; // spectators start bidding after this time interval
 const BID_INTERVAL = { min: 1000, max: 1200 };
 // HUD inventory: bought items fill these slots in purchase order
 const HUD_COLUMNS = 3;
-const HUD_ITEM_SIZE = 115;
+const HUD_ITEM_SIZE = 150;
 const HUD_SLOT_PITCH = 144;
 
 const NEXT_ITEM_DELAY = 600; // pause after the hammer hits, before the next object
@@ -94,18 +92,22 @@ export class AuctionScene extends Phaser.Scene {
     this.registry.set("purchased", this.purchased);
     this.registry.set("money", this.money);
 
-    this.auctioner = new Auctioner(this, 250, 504);
+    this.auctioner = new Auctioner(this, 250, 590);
 
-    const table = this.add.image(384, 684, "pupitre");
+    const table = this.add.image(384, 770, "pupitre");
     table.setScale(0.63);
 
     this.spectators = [];
     const spacing = sceneWidth / (SPECTATOR_COUNT + 1);
     for (let i = 0; i < SPECTATOR_COUNT; i++) {
       const spectator = this.add
-        .image(spacing * (i + 1), height, "spectator")
+        .image(
+          spacing * (i + 1),
+          height + 50,
+          "NPC_" + ((i % 4) + 1) + "_outline",
+        )
         .setOrigin(0.5, 1)
-        .setScale(Phaser.Math.FloatBetween(0.234, 0.306));
+        .setScale(Phaser.Math.FloatBetween(0.8, 0.9));
       spectator.y -= 90;
       const idle = this.tweens.add({
         targets: spectator,
@@ -120,13 +122,14 @@ export class AuctionScene extends Phaser.Scene {
       this.idleTweens.set(spectator, idle);
     }
 
-    const rect = new Phaser.Geom.Rectangle(0, height - 126, sceneWidth, 126);
-    const graphics = this.add.graphics({
-      fillStyle: { color: 0xffffff },
-      lineStyle: { color: 0x000000, width: 2 },
-    });
-    graphics.fillRectShape(rect);
-    graphics.strokeRectShape(rect);
+    const yesNoContainer = this.add.rectangle(
+      0,
+      this.scale.height - 126,
+      this.scale.width,
+      126,
+      COLORS.darkpink.hex,
+    );
+    yesNoContainer.setOrigin(0, 0);
 
     this.stopHints = [];
     const pressed = (action: () => void) => () => {
@@ -137,9 +140,11 @@ export class AuctionScene extends Phaser.Scene {
     this.addHint(
       new Button(
         this,
-        (sceneWidth * 3) / 4,
-        height - 63,
-        "YES [Y]",
+        (this.scale.width * 2) / 3,
+        height - 75,
+        "YES",
+        "press y",
+        "green",
         pressed(() => this.buy()),
         { key: "Y", width: 270 },
       ),
@@ -147,9 +152,11 @@ export class AuctionScene extends Phaser.Scene {
     this.addHint(
       new Button(
         this,
-        (sceneWidth * 1) / 4,
-        height - 63,
-        "NO [N]",
+        (this.scale.width * 1) / 3,
+        height - 75,
+        "NO",
+        "press n",
+        "pink",
         pressed(() => this.reject()),
         { key: "N", width: 270 },
       ),
@@ -158,18 +165,22 @@ export class AuctionScene extends Phaser.Scene {
     const hudWidth = this.scale.width / 3;
     const hudCenter = sceneWidth + hudWidth / 2;
     this.moneyLabel = this.add
-      .text(hudCenter, 126, "", { ...TEXT_STYLE, fontSize: "65px" })
+      .text(hudCenter, 126, "", {
+        ...TEXT_STYLE,
+        color: COLORS.yellow.hexString,
+        fontSize: "100px",
+      })
       .setOrigin(0.5);
     this.refreshMoney();
 
     this.hudCenter = hudCenter;
 
     const itemDisplayX = 960;
-    const itemDisplayY = 432;
+    const itemDisplayY = 470;
 
     // Object on sale and its price, next to the auctioner
     this.priceLabel = this.add
-      .text(itemDisplayX, itemDisplayY - 180, "", {
+      .text(itemDisplayX, itemDisplayY - 250, "", {
         ...TEXT_STYLE,
         fontSize: "76px",
       })
@@ -205,7 +216,7 @@ export class AuctionScene extends Phaser.Scene {
       itemDisplayX,
       itemDisplayY,
       this.currentItem,
-      270,
+      300,
     );
     this.itemRestX = itemDisplayX;
 
@@ -229,7 +240,7 @@ export class AuctionScene extends Phaser.Scene {
       duration: 350,
       ease: "Sine.easeInOut",
       yoyo: true,
-      repeat: -1,
+      repeat: 2,
     });
     this.stopHints.push(() => {
       hint.stop();
@@ -294,7 +305,6 @@ export class AuctionScene extends Phaser.Scene {
     });
   }
 
-  /** The player says no: a copy of the item is tossed away, spinning, and falls off screen. */
   private reject() {
     if (this.finished || this.waitingForNext) return;
     this.presentNextItem();
@@ -315,7 +325,7 @@ export class AuctionScene extends Phaser.Scene {
       x: buyer.x,
       y: buyer.y,
       scale: 0,
-      duration: 450,
+      duration: 600,
       ease: "Quad.easeIn",
       onComplete: () => flying.destroy(),
     });
@@ -325,7 +335,7 @@ export class AuctionScene extends Phaser.Scene {
     if (this.finished || this.waitingForNext) return;
     if (this.money < this.price) {
       // Can't afford it: flash the money
-      this.moneyLabel.setColor("#ff0000");
+      this.moneyLabel.setColor("red");
 
       // Restart from the resting size: otherwise a new press mid-animation
       // takes the enlarged size as its starting point and ends up stuck there.
@@ -339,7 +349,7 @@ export class AuctionScene extends Phaser.Scene {
         ease: "Quad.easeInOut",
         yoyo: true,
         onComplete: () => {
-          this.moneyLabel.setColor("#000000");
+          this.moneyLabel.setColor(COLORS.yellow.hexString);
         },
       });
 
@@ -398,7 +408,8 @@ export class AuctionScene extends Phaser.Scene {
             ...TEXT_STYLE,
             fontSize: "90px",
             fontStyle: "bold",
-            stroke: "#ffffff",
+            stroke: COLORS.yellow.hexString,
+            color: COLORS.darkpink.hexString,
             strokeThickness: 7,
           },
         )
