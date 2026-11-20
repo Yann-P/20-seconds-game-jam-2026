@@ -162,13 +162,22 @@ export class AuctionScene extends Phaser.Scene {
       ),
     );
 
+    const uiStart = this.add
+      .image(
+        (this.scale.width * 2) / 3 - 60,
+        this.scale.height / 2 - 40,
+        "UI_start",
+      )
+      .setOrigin(0, 0.5)
+      .setScale(1.5, 1.5);
+
     const hudWidth = this.scale.width / 3;
     const hudCenter = sceneWidth + hudWidth / 2;
     this.moneyLabel = this.add
-      .text(hudCenter, 126, "", {
+      .text(hudCenter, 280, "", {
         ...TEXT_STYLE,
         color: COLORS.yellow.hexString,
-        fontSize: "100px",
+        fontSize: "72px",
       })
       .setOrigin(0.5);
     this.refreshMoney();

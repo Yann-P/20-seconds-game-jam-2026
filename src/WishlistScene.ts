@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import { pickWishlist } from "./items";
 import { ItemImage } from "./ItemImage";
-import { TEXT_STYLE } from "./consts";
+import { COLORS, TEXT_STYLE } from "./consts";
 import { Button } from "./Button";
 
 export class WishlistScene extends Phaser.Scene {
@@ -14,11 +14,9 @@ export class WishlistScene extends Phaser.Scene {
     this.scene.start("auction");
   }
 
-  /** Must run from a user gesture (the start button). Not supported on iPhone Safari. */
   private requestFullscreenOnMobile() {
     if (this.sys.game.device.os.desktop) return;
     if (!this.scale.fullscreen.available || this.scale.isFullscreen) return;
-    // The game is landscape: once fullscreen, rotate with it where the browser allows (Android).
     this.scale.once(Phaser.Scale.Events.ENTER_FULLSCREEN, () => {
       const orientation = screen.orientation as ScreenOrientation & {
         lock?: (orientation: string) => Promise<void>;
@@ -34,31 +32,68 @@ export class WishlistScene extends Phaser.Scene {
     this.registry.set("wishlist", wishlist);
     this.registry.set("npcid", Phaser.Math.Between(1, 9));
 
+    const yellow = this.add.rectangle(
+      this.scale.width / 2,
+      this.scale.height / 2 + 50,
+      1180,
+      350,
+      COLORS.yellow.hex,
+    );
+
     const ui = this.add.image(
       this.scale.width / 2,
       this.scale.height / 2,
-      "UI_start2",
+      "UI_start3",
     );
     ui.setScale(1.9);
 
-    const npc = this.add.image(500, 300, "NPC_" + this.registry.get("npcid"));
-    npc.setScale(0.8);
+    this.add
+      .text(390, 430, "Order details:", {
+        ...TEXT_STYLE,
+        fontSize: "33px",
+        color: COLORS.pinkpurple.hexString,
+      })
+      .setOrigin(0, 0);
+
+    const npc = this.add.image(470, 280, "NPC_" + this.registry.get("npcid"));
+    npc.setScale(0.65);
 
     this.add
-      .text(npc.x + 160, npc.y, "Buy this for me!", {
+      .text(npc.x + 100, npc.y - 100, "CUSTOMER CU_942342_FA", {
         ...TEXT_STYLE,
-        fontSize: "90px",
+        fontSize: "40px",
+        color: COLORS.darkpink.hexString,
       })
-      .setOrigin(0, 0.5);
+      .setOrigin(0, 0);
 
-    const size = 270;
+    this.add
+      .text(npc.x + 100, npc.y - 60, "ORDER SJKLAHFAKLSHFKLS", {
+        ...TEXT_STYLE,
+        fontSize: "33px",
+        color: COLORS.darkpink.hexString,
+      })
+      .setOrigin(0, 0);
+
+    this.add
+      .text(
+        npc.x + 100,
+        npc.y - 25,
+        "REQUEST:\nBuy these 3 items for me at the auction\nBUDGET:\n$1000",
+        {
+          ...TEXT_STYLE,
+          fontSize: "33px",
+        },
+      )
+      .setOrigin(0, 0);
+
+    const size = 230;
     const gap = 58;
     const startX = width / 2 - ((wishlist.length - 1) * (size + gap)) / 2;
     wishlist.forEach((item, i) => {
       const image = new ItemImage(
         this,
         startX + i * (size + gap),
-        570,
+        580,
         item,
         size,
       );
@@ -75,7 +110,7 @@ export class WishlistScene extends Phaser.Scene {
 
     new Button(
       this,
-      1920 - 530,
+      this.scale.width / 2,
       1080 - 230,
       "OK",
       "press x",
