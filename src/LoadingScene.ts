@@ -13,8 +13,15 @@ export class LoadingScene extends Phaser.Scene {
       bar.width = width * 0.6 * value;
     });
     this.load.setPath("assets");
+
+    // Audio
+    // Credits: https://pixabay.com/sound-effects/search/thump/
+    this.load.audio("thump", ["thump.mp3"]);
+
+    // Fonts
     this.load.font("whitrabt", "whitrabt.ttf", "truetype");
 
+    // Images
     this.load.image("character_torso", "character_torso.png");
     this.load.image("character_head", "character_head.png");
     this.load.image("character_arm_L", "character_arm_L.png");

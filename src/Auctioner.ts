@@ -31,8 +31,12 @@ export class Auctioner extends Phaser.GameObjects.Container {
     sold: () => this.coupDeMarteau(),
   };
 
+  private thumpSound!: Phaser.Sound.BaseSound;
+
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y);
+
+    this.thumpSound = this.scene.sound.add("thump");
 
     this.torso = this.part(0, 0, "character_torso").setOrigin(0.5, 0.8);
 
@@ -92,22 +96,6 @@ export class Auctioner extends Phaser.GameObjects.Container {
       yoyo: true,
     });
 
-    // this.scene.tweens.add({
-    //   targets: [this.armLContainer],
-    //   angle: -30,
-    //   duration: 5000,
-    //   repeat: -1,
-    //   yoyo: true,
-    // });
-
-    // this.scene.tweens.add({
-    //   targets: [this.forearmLContainer],
-    //   angle: [-10, 10],
-    //   duration: 2000,
-    //   repeat: -1,
-    //   yoyo: true,
-    // });
-
     scene.add.existing(this);
   }
 
@@ -165,9 +153,10 @@ export class Auctioner extends Phaser.GameObjects.Container {
 
     const delay = 70;
 
-    this.scene.time.delayedCall(100, () =>
-      this.scene.cameras.main.shake(200, 0.01),
-    );
+    this.scene.time.delayedCall(100, () => {
+      this.thumpSound.play();
+      this.scene.cameras.main.shake(120, 0.012);
+    });
 
     // marteau qui tombe
     this.scene.tweens.add({
@@ -211,15 +200,5 @@ export class Auctioner extends Phaser.GameObjects.Container {
       duration: 300,
       delay: delay + 200,
     });
-
-    // this.scene.tweens.killTweensOf(target);
-    // target.setAngle(0);
-    // this.scene.tweens.add({
-    //   targets: target,
-    //   angle,
-    //   duration,
-    //   ease: "Quad.easeOut",
-    //   yoyo: true,
-    // });
   }
 }
