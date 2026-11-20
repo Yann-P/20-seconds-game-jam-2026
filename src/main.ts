@@ -3,6 +3,7 @@ import { LoadingScene } from "./LoadingScene";
 import { WishlistScene } from "./WishlistScene";
 import { AuctionScene } from "./AuctionScene";
 import { ResultsScene } from "./ResultsScene";
+import { COLORS } from "./consts";
 
 new Phaser.Game({
   type: Phaser.AUTO,
@@ -15,7 +16,7 @@ new Phaser.Game({
     autoCenter: Phaser.Scale.CENTER_BOTH,
     fullscreenTarget: "game",
   },
-  backgroundColor: "#fff",
+  backgroundColor: COLORS.purple.hexString,
   scene: [LoadingScene, WishlistScene, AuctionScene, ResultsScene],
   antialias: true,
   roundPixels: true,

@@ -33,6 +33,14 @@ export class WishlistScene extends Phaser.Scene {
     const wishlist = pickWishlist();
     this.registry.set("wishlist", wishlist);
 
+    const ui = this.add.image(
+      this.scale.width / 2,
+      this.scale.height / 2,
+      "UI_start2",
+    );
+
+    ui.setScale(1.6);
+
     this.add
       .text(width / 2, 216, "Buy this at auction!", {
         ...TEXT_STYLE,
@@ -62,10 +70,17 @@ export class WishlistScene extends Phaser.Scene {
       });
     });
 
-    new Button(this, 1920 / 2, 900, "Go to auction [X]", () => this.startGame(), {
-      key: "X",
-      width: 504,
-      fireOn: "up",
-    });
+    new Button(
+      this,
+      1920 / 2,
+      900,
+      "Go to auction [X]",
+      () => this.startGame(),
+      {
+        key: "X",
+        width: 504,
+        fireOn: "up",
+      },
+    );
   }
 }

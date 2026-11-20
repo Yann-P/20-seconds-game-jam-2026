@@ -3,7 +3,7 @@ import { shuffledItems, type Item } from "./items";
 import { ItemImage } from "./ItemImage";
 import { Auctioner } from "./Auctioner";
 import { Button } from "./Button";
-import { TEXT_STYLE } from "./consts";
+import { COLORS, TEXT_STYLE, TIMER_HEIGHT } from "./consts";
 
 const DURATION = 20000;
 const SPECTATOR_COUNT = 8;
@@ -57,9 +57,24 @@ export class AuctionScene extends Phaser.Scene {
   create() {
     const { width, height } = this.scale;
     const sceneWidth = (width * 2) / 3; // left two thirds; the HUD takes the rest
+
+    const yellowBackground = this.add.rectangle(
+      this.scale.width / 3,
+      0,
+      this.scale.width / 3,
+      this.scale.height,
+      COLORS.yellow.hex,
+    );
+
+    yellowBackground.setOrigin(0, 0);
+
+    this.add
+      .rectangle(0, 0, width, TIMER_HEIGHT, COLORS.pinkpurple.hex)
+      .setOrigin(0, 0);
+
     this.bar = this.add
-      .rectangle(0, 0, width, 54, 0xcccccc)
-      .setStrokeStyle(2, 0x0000000)
+      .rectangle(0, 0, width, TIMER_HEIGHT, COLORS.pink.hex)
+      .setStrokeStyle(2, COLORS.purple.hex)
       .setOrigin(0, 0);
     this.label = this.add
       .text(15, 27, "", { ...TEXT_STYLE, fontSize: "36px", color: "black" })
@@ -83,15 +98,6 @@ export class AuctionScene extends Phaser.Scene {
 
     const table = this.add.image(384, 684, "pupitre");
     table.setScale(0.63);
-
-    const rect2 = new Phaser.Geom.Rectangle(
-      0,
-      height - 126 - 126,
-      sceneWidth,
-      126,
-    );
-    const graphics2 = this.add.graphics({ fillStyle: { color: 0xffffff } });
-    graphics2.fillRectShape(rect2);
 
     this.spectators = [];
     const spacing = sceneWidth / (SPECTATOR_COUNT + 1);
@@ -149,13 +155,8 @@ export class AuctionScene extends Phaser.Scene {
       ),
     );
 
-    // HUD (right third, full height below the timer): money, then the bought items
-    const hudWidth = width - sceneWidth;
+    const hudWidth = this.scale.width / 3;
     const hudCenter = sceneWidth + hudWidth / 2;
-    this.add
-      .rectangle(sceneWidth, 54, hudWidth, height - 54, 0xffffff)
-      .setStrokeStyle(2)
-      .setOrigin(0, 0);
     this.moneyLabel = this.add
       .text(hudCenter, 126, "", { ...TEXT_STYLE, fontSize: "65px" })
       .setOrigin(0.5);
@@ -197,8 +198,6 @@ export class AuctionScene extends Phaser.Scene {
           },
         } as any,
       },
-      //blendMode: "ADD",
-      //gravityY: 110,
     });
 
     this.itemDisplay = new ItemImage(

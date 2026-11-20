@@ -29,6 +29,7 @@ export class LoadingScene extends Phaser.Scene {
     this.load.image("UI_button_up", "UI_button_up.png");
     this.load.image("UI_button_down", "UI_button_down.png");
     this.load.image("UI_start", "UI_start.png");
+    this.load.image("UI_start2", "UI_start2.png");
     for (const item of ITEMS) {
       this.load.image(item.texture, `${item.texture}.png`);
     }
