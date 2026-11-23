@@ -155,7 +155,6 @@ export class Auctioner extends Phaser.GameObjects.Container {
   private coupDeMarteau() {
     this.scene.tweens.killTweensOf(this.armRContainer);
     this.scene.tweens.killTweensOf(this.forearmRContainer);
-    //this.scene.tweens.killTweensOf(this.torsoContainer);
 
     const delay = 70;
 

@@ -1,0 +1,123 @@
+[
+  {
+    "id": 1,
+    "persona": "rough military guy",
+    "customerId": "CU_006103_FW",
+    "orderId": "QX7RTM2KPL",
+    "resultSentences": {
+      "perfect": "Perfect. This will be very helpful with the rebels.",
+      "mid": "Eh, it's something.",
+      "bad": "I'm very disappointed, kiddo."
+    }
+  },
+  {
+    "id": 2,
+    "persona": "religious guy / monk",
+    "customerId": "CU_144795_JJ",
+    "orderId": "B3NJY8FSC6",
+    "resultSentences": {
+      "perfect": "Wonderful. All my brothers and sisters will benefit from it.",
+      "mid": "You tried your best.",
+      "bad": "Some people will die, but everybody dies at some point."
+    }
+  },
+  {
+    "id": 3,
+    "persona": "religious woman",
+    "customerId": "CU_251605_LY",
+    "orderId": "ZK5WMH0DPR",
+    "resultSentences": {
+      "perfect": "Divine. Now, don't tell anyone you know us and forget my face.",
+      "mid": "We are not happy.",
+      "bad": "You will suffer consequences."
+    }
+  },
+  {
+    "id": 4,
+    "persona": "side cut person",
+    "customerId": "CU_250538_XM",
+    "orderId": "T8GAF4XNU7",
+    "resultSentences": {
+      "perfect": "Marvelous. This will help me a lot.",
+      "mid": "Well, the glass is half empty...",
+      "bad": "I gave you all I have: my hopes, my money. What will I do now?"
+    }
+  },
+  {
+    "id": 5,
+    "persona": "desert person",
+    "customerId": "CU_610054_ID",
+    "orderId": "LM1VQC6ZJY",
+    "resultSentences": {
+      "perfect": "Great. My tribe is thankful for your help.",
+      "mid": "Is everything here?",
+      "bad": "Such poor results..."
+    }
+  },
+  {
+    "id": 6,
+    "persona": "opec military guy",
+    "customerId": "CU_971163_CS",
+    "orderId": "H2UKE7TOW4",
+    "resultSentences": {
+      "perfect": "Job done. Gloria to el Commandatura.",
+      "mid": "*sigh*",
+      "bad": "I killed people for less than that."
+    }
+  },
+  {
+    "id": 7,
+    "persona": "tekno kid",
+    "customerId": "CU_795272_NP",
+    "orderId": "DY9PXN3RCL",
+    "resultSentences": {
+      "perfect": "Marbz! And remember, no gods, no masters.",
+      "mid": "I'm not vibing with you here.",
+      "bad": "Forget my number, you killed the mood."
+    }
+  },
+  {
+    "id": 8,
+    "persona": "radio operator girl",
+    "customerId": "CU_784240_AB",
+    "orderId": "S4JFB1HZO8",
+    "resultSentences": {
+      "perfect": "1, 2, 3, you are a sweet pea!",
+      "mid": "Better than nothing, cutie pie.",
+      "bad": "It's ok honey, we all have bad days..."
+    }
+  },
+  {
+    "id": 9,
+    "persona": "high level person",
+    "customerId": "CU_450839_JS",
+    "orderId": "W6CRK2TLV7",
+    "resultSentences": {
+      "perfect": "Great. The President will be happy. Your name shines.",
+      "mid": "Maybe my instructions weren't clear enough...",
+      "bad": "The President will be very disappointed by your attitude. Such a dark turn."
+    }
+  },
+  {
+    "id": 10,
+    "persona": "CAT stronaut",
+    "customerId": "CU_795400_BL",
+    "orderId": "N5EZT9KGA2",
+    "resultSentences": {
+      "perfect": "Purrrrrr >⩊<",
+      "mid": "Meow ? ᓚ₍ ^. .^₎",
+      "bad": "Hissssssss ･ ༝ ･"
+    }
+  },
+  {
+    "id": 11,
+    "persona": "old military guy",
+    "customerId": "CU_424846_YC",
+    "orderId": "P8VHD3QYJ6",
+    "resultSentences": {
+      "perfect": "Nothing to report. I will call you again.",
+      "mid": "Please do better next time.",
+      "bad": "My partner always told me that rookies were not trustworthy."
+    }
+  }
+]

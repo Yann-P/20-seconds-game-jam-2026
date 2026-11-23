@@ -22,6 +22,10 @@ export const COLLECTIONS: Collection[] = [
   { name: "phone", count: 3 },
   { name: "plant", count: 3 },
   { name: "prothese", count: 3 },
+  { name: "gun", count: 3 },
+  { name: "hardisk", count: 3 },
+  { name: "paper", count: 3 },
+  { name: "sunglass", count: 3 },
 ];
 
 export const ITEMS: Item[] = COLLECTIONS.flatMap((collection) =>

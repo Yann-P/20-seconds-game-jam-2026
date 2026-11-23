@@ -1,8 +1,16 @@
 import Phaser from "phaser";
 import type { Item } from "./items";
 import { ItemImage } from "./ItemImage";
-import { TEXT_STYLE } from "./consts";
 import { Button } from "./Button";
+import { findNpc, resultSentenceForPurchases } from "./npcs";
+import {
+  ORDER_SHEET_CONTENT_LEFT_X,
+  ORDER_SHEET_CONTENT_RIGHT_X,
+  addOrderSheet,
+  addOrderSheetSectionLabel,
+} from "./OrderSheet";
+
+const ITEM_ROW_GAP = 30;
 
 export class ResultsScene extends Phaser.Scene {
   constructor() {
@@ -10,48 +18,73 @@ export class ResultsScene extends Phaser.Scene {
   }
 
   create() {
-    const { width } = this.scale;
     const wishlist: Item[] = this.registry.get("wishlist") ?? [];
     const purchased: Item[] = this.registry.get("purchased") ?? [];
+    const npc = findNpc(this, this.registry.get("npcid"));
 
-    const size = 173;
-    const gap = 58;
-    const startX = width / 2 - ((wishlist.length - 1) * (size + gap)) / 2;
-    let bought = 0;
-    wishlist.forEach((item, i) => {
-      const x = startX + i * (size + gap);
-      const got = purchased.includes(item);
-      if (got) bought++;
-      new ItemImage(this, x, 360, item, size);
-      this.add
-        .text(x, 522, got ? "yes" : "no", {
-          ...TEXT_STYLE,
-          fontSize: "50px",
-        })
-        .setOrigin(0.5);
-    });
+    const wishlistTextures = new Set(wishlist.map((item) => item.texture));
+    const correctItems = purchased.filter((item) =>
+      wishlistTextures.has(item.texture),
+    );
+    const superfluousItems = purchased.filter(
+      (item) => !wishlistTextures.has(item.texture),
+    );
 
-    this.add
-      .text(width / 2, 684, `${bought} objects / ${wishlist.length}`, {
-        ...TEXT_STYLE,
-        fontSize: "58px",
-      })
-      .setOrigin(0.5);
+    addOrderSheet(
+      this,
+      npc,
+      "FEEDBACK:\n" +
+        resultSentenceForPurchases(
+          npc,
+          correctItems.length,
+          superfluousItems.length,
+        ),
+    );
+
+    addOrderSheetSectionLabel(
+      this,
+      430,
+      `Order delivered: ${correctItems.length} / ${wishlist.length}`,
+    );
+    this.addItemRow(correctItems, 525, 120);
+
+    if (superfluousItems.length > 0) {
+      addOrderSheetSectionLabel(this, 600, "I did not ask for this:");
+      this.addItemRow(superfluousItems, 690, 110);
+    }
 
     new Button(
       this,
       960,
-      900,
-      "Back to wishlist",
+      1080 - 230,
+      "Again?",
       "press x",
       "green",
       () => this.replay(),
       {
         key: "X",
-        width: 540,
+        //width: 540,
         fireOn: "up",
       },
     );
+  }
+
+  private addItemRow(items: Item[], y: number, itemSize: number) {
+    const distanceBetweenItemCenters = Math.min(
+      itemSize + ITEM_ROW_GAP,
+      (ORDER_SHEET_CONTENT_RIGHT_X - ORDER_SHEET_CONTENT_LEFT_X) / items.length,
+    );
+    items.forEach((item, itemIndex) => {
+      new ItemImage(
+        this,
+        ORDER_SHEET_CONTENT_LEFT_X +
+          itemSize / 2 +
+          itemIndex * distanceBetweenItemCenters,
+        y,
+        item,
+        itemSize,
+      );
+    });
   }
 
   private replay() {

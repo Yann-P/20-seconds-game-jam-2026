@@ -109,7 +109,7 @@ export class AuctionScene extends Phaser.Scene {
         .image(
           spacing * (i + 1),
           height + 50,
-          "NPC_" + Phaser.Math.Between(1, 4) + "_outline",
+          "NPC_" + Phaser.Math.Between(1, 9) + "_outline",
         )
         .setOrigin(0.5, 1)
         .setScale(Phaser.Math.FloatBetween(0.8, 0.9));
@@ -177,9 +177,9 @@ export class AuctionScene extends Phaser.Scene {
       .setScale(1.5, 1.5);
 
     const hudWidth = this.scale.width / 3;
-    const hudCenter = sceneWidth + hudWidth / 2;
+    const hudCenter = sceneWidth + hudWidth / 2 - 40;
     this.moneyLabel = this.add
-      .text(hudCenter, 280, "", {
+      .text(hudCenter, 250, "", {
         ...TEXT_STYLE,
         color: COLORS.yellow.hexString,
         fontSize: "72px",
@@ -324,7 +324,6 @@ export class AuctionScene extends Phaser.Scene {
     this.presentNextItem();
   }
 
-  /** A spectator (the last bidder) wins: a copy of the item flies to them, shrinking to nothing. */
   private flyItemToSpectator() {
     const buyer =
       this.lastBidder ?? Phaser.Utils.Array.GetRandom(this.spectators);
@@ -382,8 +381,9 @@ export class AuctionScene extends Phaser.Scene {
   private flyItemToInventory(item: Item, slot: number) {
     const x =
       this.hudCenter +
-      ((slot % HUD_COLUMNS) - (HUD_COLUMNS - 1) / 2) * HUD_SLOT_PITCH;
-    const y = 288 + Math.floor(slot / HUD_COLUMNS) * HUD_SLOT_PITCH;
+      ((slot % HUD_COLUMNS) - (HUD_COLUMNS - 1) / 2) * HUD_SLOT_PITCH -
+      50;
+    const y = 400 + Math.floor(slot / HUD_COLUMNS) * HUD_SLOT_PITCH;
     const bought = new ItemImage(
       this,
       this.itemDisplay.x,

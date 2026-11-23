@@ -10,13 +10,14 @@ export function addTypewriterText(
   style: Phaser.Types.GameObjects.Text.TextStyle,
 ): Phaser.GameObjects.Text {
   const text = scene.add.text(x, y, "", style);
+  const fullTextWithLineBreaks = text.getWrappedText(fullText).join("\n");
   let visibleLetterCount = 0;
   scene.time.addEvent({
     delay: DELAY_BETWEEN_LETTERS_MS,
-    repeat: fullText.length - 1,
+    repeat: fullTextWithLineBreaks.length - 1,
     callback: () => {
       visibleLetterCount += 1;
-      text.setText(fullText.slice(0, visibleLetterCount));
+      text.setText(fullTextWithLineBreaks.slice(0, visibleLetterCount));
     },
   });
   return text;

@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { ITEMS } from "./items";
+import { NPCS_JSON_FILE, NPCS_JSON_KEY } from "./npcs";
 
 export class LoadingScene extends Phaser.Scene {
   constructor() {
@@ -23,6 +24,8 @@ export class LoadingScene extends Phaser.Scene {
     // Fonts
     this.load.font("whitrabt", "whitrabt.ttf", "truetype");
 
+    this.load.json(NPCS_JSON_KEY, NPCS_JSON_FILE);
+
     // Images
     this.load.image("character_torso", "character_torso.png");
     this.load.image("character_head", "character_head.png");
@@ -43,6 +46,11 @@ export class LoadingScene extends Phaser.Scene {
     this.load.image("NPC_2_outline", "NPC_2_outline.png");
     this.load.image("NPC_3_outline", "NPC_3_outline.png");
     this.load.image("NPC_4_outline", "NPC_4_outline.png");
+    this.load.image("NPC_5_outline", "NPC_5_outline.png");
+    this.load.image("NPC_6_outline", "NPC_6_outline.png");
+    this.load.image("NPC_7_outline", "NPC_7_outline.png");
+    this.load.image("NPC_8_outline", "NPC_8_outline.png");
+    this.load.image("NPC_9_outline", "NPC_9_outline.png");
     this.load.image("NPC_1", "NPC_1_frame.png");
     this.load.image("NPC_2", "NPC_2_frame.png");
     this.load.image("NPC_3", "NPC_3_frame.png");
