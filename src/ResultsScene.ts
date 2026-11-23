@@ -11,6 +11,7 @@ import {
 } from "./OrderSheet";
 
 const ITEM_ROW_GAP = 30;
+const BOUGHT_MARK_OFFSET_FROM_ITEM_CENTER = 50;
 
 export class ResultsScene extends Phaser.Scene {
   constructor() {
@@ -46,11 +47,18 @@ export class ResultsScene extends Phaser.Scene {
       430,
       `Order delivered: ${correctItems.length} / ${wishlist.length}`,
     );
-    this.addItemRow(correctItems, 525, 120);
+    const wishlistItemImages = this.addItemRow(wishlist, 545, 150);
+    const purchasedTextures = new Set(purchased.map((item) => item.texture));
+    wishlist.forEach((item, itemIndex) => {
+      this.addBoughtMark(
+        wishlistItemImages[itemIndex],
+        purchasedTextures.has(item.texture),
+      );
+    });
 
     if (superfluousItems.length > 0) {
-      addOrderSheetSectionLabel(this, 600, "I did not ask for this:");
-      this.addItemRow(superfluousItems, 690, 110);
+      addOrderSheetSectionLabel(this, 630, "I did not ask for this:");
+      this.addItemRow(superfluousItems, 715, 85);
     }
 
     new Button(
@@ -74,17 +82,26 @@ export class ResultsScene extends Phaser.Scene {
       itemSize + ITEM_ROW_GAP,
       (ORDER_SHEET_CONTENT_RIGHT_X - ORDER_SHEET_CONTENT_LEFT_X) / items.length,
     );
-    items.forEach((item, itemIndex) => {
-      new ItemImage(
-        this,
-        ORDER_SHEET_CONTENT_LEFT_X +
-          itemSize / 2 +
-          itemIndex * distanceBetweenItemCenters,
-        y,
-        item,
-        itemSize,
-      );
-    });
+    return items.map(
+      (item, itemIndex) =>
+        new ItemImage(
+          this,
+          ORDER_SHEET_CONTENT_LEFT_X +
+            itemSize / 2 +
+            itemIndex * distanceBetweenItemCenters,
+          y,
+          item,
+          itemSize,
+        ),
+    );
+  }
+
+  private addBoughtMark(itemImage: ItemImage, wasBought: boolean) {
+    this.add.image(
+      itemImage.x + BOUGHT_MARK_OFFSET_FROM_ITEM_CENTER,
+      itemImage.y + BOUGHT_MARK_OFFSET_FROM_ITEM_CENTER,
+      wasBought ? "mark_yes" : "mark_no",
+    );
   }
 
   private replay() {

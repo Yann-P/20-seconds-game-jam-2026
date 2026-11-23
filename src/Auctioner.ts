@@ -1,4 +1,10 @@
 import Phaser from "phaser";
+import { COLORS, TEXT_STYLE } from "./consts";
+
+const SOLD_EXCLAMATIONS = ["FANTASTIC", "INCREDIBLE", "WONDERFUL"];
+const SOLD_EXCLAMATION_OFFSET_ABOVE_HEAD = 140;
+const SOLD_EXCLAMATION_RISE_DISTANCE = 120;
+const SOLD_EXCLAMATION_DURATION_MS = 900;
 
 /**
  * Animations the scene can trigger with `auctioner.play(name)`.
@@ -152,7 +158,35 @@ export class Auctioner extends Phaser.GameObjects.Container {
     return image;
   }
 
+  private showSoldExclamation() {
+    const headWorldPosition = this.head.getWorldTransformMatrix();
+    const exclamation = this.scene.add
+      .text(
+        headWorldPosition.tx + Phaser.Math.Between(-100, 200),
+        headWorldPosition.ty -
+          SOLD_EXCLAMATION_OFFSET_ABOVE_HEAD +
+          Phaser.Math.Between(0, 100),
+        Phaser.Utils.Array.GetRandom(SOLD_EXCLAMATIONS),
+        {
+          ...TEXT_STYLE,
+          fontSize: "48px",
+          color: COLORS.darkpink.hexString,
+        },
+      )
+      .setOrigin(0.5);
+
+    this.scene.tweens.add({
+      targets: exclamation,
+      y: exclamation.y - SOLD_EXCLAMATION_RISE_DISTANCE,
+      alpha: 0,
+      duration: SOLD_EXCLAMATION_DURATION_MS,
+      ease: "Quad.easeOut",
+      onComplete: () => exclamation.destroy(),
+    });
+  }
+
   private coupDeMarteau() {
+    this.showSoldExclamation();
     this.scene.tweens.killTweensOf(this.armRContainer);
     this.scene.tweens.killTweensOf(this.forearmRContainer);
 

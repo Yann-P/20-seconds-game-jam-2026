@@ -9,7 +9,7 @@ import { Button } from "./Button";
 import { COLORS, TEXT_STYLE, TIMER_HEIGHT } from "./consts";
 
 const DURATION = 20000;
-const SPECTATOR_COUNT = 6;
+const SPECTATOR_COUNT = 7;
 
 const START_MONEY = 1000;
 const OPENING_PRICE = { min: 100, max: 200 };
@@ -31,6 +31,7 @@ export class AuctionScene extends Phaser.Scene {
   private purchased: Item[] = [];
   private itemDisplay!: ItemImage;
   private priceLabel!: Phaser.GameObjects.Text;
+  private priceLabelLabel!: Phaser.GameObjects.Text;
   private moneyLabel!: Phaser.GameObjects.Text;
   private bidEvent?: Phaser.Time.TimerEvent;
   private lostEvent?: Phaser.Time.TimerEvent;
@@ -107,9 +108,9 @@ export class AuctionScene extends Phaser.Scene {
     for (let i = 0; i < SPECTATOR_COUNT; i++) {
       const spectator = this.add
         .image(
-          spacing * (i + 1),
+          spacing * (i + 1) - 150,
           height + 50,
-          "NPC_" + Phaser.Math.Between(1, 9) + "_outline",
+          "NPC_" + Phaser.Math.Between(2, 9) + "_outline",
         )
         .setOrigin(0.5, 1)
         .setScale(Phaser.Math.FloatBetween(0.8, 0.9));
@@ -167,7 +168,7 @@ export class AuctionScene extends Phaser.Scene {
       ),
     );
 
-    const uiStart = this.add
+    const uiStartHud = this.add
       .image(
         (this.scale.width * 2) / 3 - 60,
         this.scale.height / 2 - 40,
@@ -176,12 +177,27 @@ export class AuctionScene extends Phaser.Scene {
       .setOrigin(0, 0.5)
       .setScale(1.5, 1.5);
 
+    const yellowBackgroundHud = this.add
+      .rectangle(
+        uiStartHud.x + 35,
+        uiStartHud.y,
+        uiStartHud.width - 53,
+        200,
+        COLORS.yellow.hex,
+      )
+      .setOrigin(0, 0.5)
+      .setScale(1.5);
+
+    yellowBackground.setOrigin(0, 0);
+
+    //// HUD ////
     const hudWidth = this.scale.width / 3;
     const hudCenter = sceneWidth + hudWidth / 2 - 40;
     this.moneyLabel = this.add
       .text(hudCenter, 250, "", {
         ...TEXT_STYLE,
-        color: COLORS.yellow.hexString,
+        color: COLORS.pink.hexString,
+        align: "left",
         fontSize: "72px",
       })
       .setOrigin(0.5);
@@ -191,6 +207,13 @@ export class AuctionScene extends Phaser.Scene {
 
     const itemDisplayX = 960;
     const itemDisplayY = 470;
+
+    this.priceLabelLabel = this.add
+      .text(itemDisplayX, itemDisplayY - 320, "PRICE", {
+        ...TEXT_STYLE,
+        fontSize: "76px",
+      })
+      .setOrigin(0.5);
 
     // Object on sale and its price, next to the auctioner
     this.priceLabel = this.add
@@ -273,6 +296,7 @@ export class AuctionScene extends Phaser.Scene {
       this.finished = true;
       this.itemDisplay.setVisible(false);
       this.priceLabel.setVisible(false);
+      this.priceLabelLabel.setVisible(false);
       this.time.delayedCall(700, () => this.scene.start("results"));
       return;
     }
@@ -468,7 +492,7 @@ export class AuctionScene extends Phaser.Scene {
   }
 
   private refreshMoney() {
-    this.moneyLabel.setText(`$${this.money}`);
+    this.moneyLabel.setText(`CREDIT: $${this.money}`);
   }
 
   update() {

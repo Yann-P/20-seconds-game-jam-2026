@@ -42,6 +42,10 @@ export class LoadingScene extends Phaser.Scene {
     this.load.image("UI_button_down_green", "UI_button_down_green.png");
     this.load.image("UI_start", "UI_start.png");
     this.load.image("UI_start3", "UI_start3.png");
+    this.load.image("mark_yes", "mark_yes.png");
+    this.load.image("mark_no", "mark_no.png");
+    this.load.image("review_star_empty", "review_star_empty.png");
+    this.load.image("review_start_full", "review_start_full.png");
     this.load.image("NPC_1_outline", "NPC_1_outline.png");
     this.load.image("NPC_2_outline", "NPC_2_outline.png");
     this.load.image("NPC_3_outline", "NPC_3_outline.png");
