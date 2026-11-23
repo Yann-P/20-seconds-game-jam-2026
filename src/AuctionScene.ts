@@ -1,5 +1,8 @@
 import Phaser from "phaser";
-import { shuffledItems, type Item } from "./items";
+import {
+  itemsInPresentationOrderWithWishlistGuaranteedEarly,
+  type Item,
+} from "./items";
 import { ItemImage } from "./ItemImage";
 import { Auctioner } from "./Auctioner";
 import { Button } from "./Button";
@@ -84,7 +87,9 @@ export class AuctionScene extends Phaser.Scene {
     // The scene instance is reused between games: reset state here.
     this.money = START_MONEY;
     this.purchased = [];
-    this.deck = shuffledItems();
+    this.deck = itemsInPresentationOrderWithWishlistGuaranteedEarly(
+      this.registry.get("wishlist") ?? [],
+    );
     this.finished = false;
     this.waitingForNext = false;
     this.idleTweens.clear();
@@ -104,7 +109,7 @@ export class AuctionScene extends Phaser.Scene {
         .image(
           spacing * (i + 1),
           height + 50,
-          "NPC_" + ((i % 4) + 1) + "_outline",
+          "NPC_" + Phaser.Math.Between(1, 4) + "_outline",
         )
         .setOrigin(0.5, 1)
         .setScale(Phaser.Math.FloatBetween(0.8, 0.9));
@@ -263,7 +268,7 @@ export class AuctionScene extends Phaser.Scene {
     this.lostEvent?.remove();
 
     // Each object is auctioned only once: when none is left, the auction ends early.
-    const next = this.deck.pop();
+    const next = this.deck.shift();
     if (!next) {
       this.finished = true;
       this.itemDisplay.setVisible(false);
@@ -411,8 +416,8 @@ export class AuctionScene extends Phaser.Scene {
       const text = this.add
         .text(
           spectator.x,
-          spectator.y - spectator.displayHeight - 18,
-          `+${increase}`,
+          spectator.y - spectator.displayHeight,
+          `+ \$${increase}`,
           {
             ...TEXT_STYLE,
             fontSize: "90px",

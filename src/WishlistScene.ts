@@ -87,20 +87,20 @@ export class WishlistScene extends Phaser.Scene {
       .setOrigin(0, 0);
 
     const size = 230;
-    const gap = 58;
+    const gap = 120;
     const startX = width / 2 - ((wishlist.length - 1) * (size + gap)) / 2;
     wishlist.forEach((item, i) => {
       const image = new ItemImage(
         this,
         startX + i * (size + gap),
-        580,
+        600,
         item,
         size,
       );
 
       this.tweens.add({
         targets: [image],
-        y: image.y + 36,
+        y: image.y + 30,
         angle: [-2, 2],
         duration: 2000 + i * 1000,
         yoyo: true,

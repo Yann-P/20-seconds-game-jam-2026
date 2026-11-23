@@ -38,7 +38,28 @@ export function pickWishlist(): Item[] {
   return Phaser.Utils.Array.Shuffle([...ITEMS]).slice(0, WISHLIST_SIZE);
 }
 
-/** Every item exactly once, in random order. */
-export function shuffledItems(): Item[] {
-  return Phaser.Utils.Array.Shuffle([...ITEMS]);
+export const WISHLIST_GUARANTEED_WITHIN_FIRST_PRESENTED_ITEMS = 20;
+
+export function itemsInPresentationOrderWithWishlistGuaranteedEarly(
+  wishlist: Item[],
+): Item[] {
+  const wishlistTextures = new Set(wishlist.map((item) => item.texture));
+  const wishlistItems = ITEMS.filter((item) =>
+    wishlistTextures.has(item.texture),
+  );
+  const shuffledNonWishlistItems = Phaser.Utils.Array.Shuffle(
+    ITEMS.filter((item) => !wishlistTextures.has(item.texture)),
+  );
+  const nonWishlistItemsPresentedEarlyCount = Math.max(
+    0,
+    WISHLIST_GUARANTEED_WITHIN_FIRST_PRESENTED_ITEMS - wishlistItems.length,
+  );
+  const itemsPresentedEarly = Phaser.Utils.Array.Shuffle([
+    ...wishlistItems,
+    ...shuffledNonWishlistItems.slice(0, nonWishlistItemsPresentedEarlyCount),
+  ]);
+  const itemsPresentedLate = shuffledNonWishlistItems.slice(
+    nonWishlistItemsPresentedEarlyCount,
+  );
+  return [...itemsPresentedEarly, ...itemsPresentedLate];
 }
