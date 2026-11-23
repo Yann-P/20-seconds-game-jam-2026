@@ -8,7 +8,7 @@ import { Auctioner } from "./Auctioner";
 import { Button } from "./Button";
 import { COLORS, TEXT_STYLE, TIMER_HEIGHT } from "./consts";
 
-const DURATION = 20000;
+const DURATION = 2000;
 const SPECTATOR_COUNT = 7;
 
 const START_MONEY = 1000;
@@ -221,7 +221,7 @@ export class AuctionScene extends Phaser.Scene {
     const hudWidth = this.scale.width / 3;
     const hudCenter = sceneWidth + hudWidth / 2 - 40;
     this.moneyLabel = this.add
-      .text(hudCenter - 270, 190, "", {
+      .text(hudCenter - 270, 200, "", {
         ...TEXT_STYLE,
         color: COLORS.pink.hexString,
         align: "left",
@@ -230,7 +230,7 @@ export class AuctionScene extends Phaser.Scene {
       .setOrigin(0, 0);
 
     this.add
-      .text(hudCenter - 280, 250, "--------------------------------", {
+      .text(hudCenter - 280, 260, "--------------------------------", {
         ...TEXT_STYLE,
         color: COLORS.pink.hexString,
         align: "left",
@@ -248,11 +248,11 @@ export class AuctionScene extends Phaser.Scene {
       .setOrigin(0, 0);
 
     this.add
-      .text(hudCenter - 280, 210, "INVENTORY:", {
+      .text(hudCenter - 280, 300, "INVENTORY:", {
         ...TEXT_STYLE,
         color: COLORS.pink.hexString,
         align: "left",
-        fontSize: "54px",
+        fontSize: "30px",
       })
       .setOrigin(0, 0);
 
@@ -433,6 +433,7 @@ export class AuctionScene extends Phaser.Scene {
       item,
       HUD_ITEM_SIZE,
     );
+    bought.setTexture(item.texture + "_outline_pink");
     const restScale = bought.fitScale;
     bought.setScale(this.itemDisplay.scale);
     this.tweens.add({

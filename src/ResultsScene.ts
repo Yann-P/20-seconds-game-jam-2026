@@ -31,8 +31,6 @@ export class ResultsScene extends Phaser.Scene {
       (item) => !wishlistTextures.has(item.texture),
     );
 
-    this.add.image(500, 300, "review_star_empty").setScale(0.7);
-
     addOrderSheet(
       this,
       npc,
@@ -62,6 +60,24 @@ export class ResultsScene extends Phaser.Scene {
       addOrderSheetSectionLabel(this, 630, "I did not ask for this:");
       this.addItemRow(superfluousItems, 715, 85);
     }
+
+    this.add.image(760, 275, "review_star_full").setScale(0.5);
+    this.add
+      .image(
+        760 + 40,
+        275,
+        correctItems.length > 1 ? "review_star_full" : "review_star_empty",
+      )
+      .setScale(0.5);
+    this.add
+      .image(
+        760 + 40 * 2,
+        275,
+        correctItems.length > 2 && superfluousItems.length === 0
+          ? "review_star_full"
+          : "review_star_empty",
+      )
+      .setScale(0.5);
 
     new Button(
       this,

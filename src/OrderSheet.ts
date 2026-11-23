@@ -15,6 +15,26 @@ export function addOrderSheet(scene: Phaser.Scene, npc: Npc, message: string) {
   const centerY = scene.scale.height / 2;
 
   scene.add.rectangle(centerX, centerY + 50, 1180, 350, COLORS.yellow.hex);
+
+  const yellowStripTop = scene.add.tileSprite(
+    centerX,
+    centerY - 160,
+    1180,
+    50,
+    "line_yellow",
+  );
+  yellowStripTop.setOrigin(0.5, 0);
+
+  const yellowStripBottom = scene.add.tileSprite(
+    centerX,
+    centerY + 200,
+    1180,
+    50,
+    "line_yellow",
+  );
+  yellowStripBottom.tileRotation = -Math.PI;
+  yellowStripBottom.setOrigin(0.5, 0);
+
   scene.add.image(centerX, centerY, "UI_start3").setScale(1.9);
   scene.add
     .image(NPC_PORTRAIT_X, NPC_PORTRAIT_Y, "NPC_" + npc.id)
