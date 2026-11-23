@@ -2,24 +2,23 @@ import Phaser from "phaser";
 import { ITEMS } from "./items";
 import { NPCS_JSON_FILE, NPCS_JSON_KEY } from "./npcs";
 
+const BACKGROUND_MUSIC_KEY = "background_music";
+const BACKGROUND_MUSIC_VOLUME = 0.4;
+
 export class LoadingScene extends Phaser.Scene {
   constructor() {
     super("loading");
   }
 
   preload() {
-    const { width, height } = this.scale;
-    const bar = this.add.rectangle(width / 2, height / 2, 0, 54, 0xffffff);
-    this.load.on("progress", (value: number) => {
-      bar.width = width * 0.6 * value;
-    });
     this.load.setPath("assets");
 
     // Audio
-    // Credits: https://pixabay.com/sound-effects/search/thump/
+    // Credits: https://pixabay.com/sound-effects/
     this.load.audio("thump", ["thump.mp3"]);
     this.load.audio("woosh", ["woosh.mp3"]);
     this.load.audio("click", ["click.mp3"]);
+    this.load.audio(BACKGROUND_MUSIC_KEY, ["monume-cyberpunk-519219.mp3"]);
 
     // Fonts
     this.load.font("whitrabt", "whitrabt.ttf", "truetype");
@@ -27,6 +26,12 @@ export class LoadingScene extends Phaser.Scene {
     this.load.json(NPCS_JSON_KEY, NPCS_JSON_FILE);
 
     // Images
+    this.load.image("logo_nude", "logo_nude.png");
+    this.load.image("line_pink1", "line_pink1.png");
+    this.load.image("line_pink2", "line_pink2.png");
+    this.load.image("line_yellow", "line_yellow.png");
+    this.load.image("line_purple", "line_purple.png");
+    this.load.image("line_cyan", "line_cyan.png");
     this.load.image("character_torso", "character_torso.png");
     this.load.image("character_head", "character_head.png");
     this.load.image("character_arm_L", "character_arm_L.png");
@@ -70,6 +75,10 @@ export class LoadingScene extends Phaser.Scene {
   }
 
   create() {
+    this.sound.play(BACKGROUND_MUSIC_KEY, {
+      volume: BACKGROUND_MUSIC_VOLUME,
+      loop: true,
+    });
     this.scene.start("wishlist");
   }
 }

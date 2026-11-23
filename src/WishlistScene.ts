@@ -76,5 +76,7 @@ export class WishlistScene extends Phaser.Scene {
         fireOn: "up",
       },
     );
+
+    this.add.image(this.scale.width / 2, 100, "logo_nude").setScale(0.9);
   }
 }

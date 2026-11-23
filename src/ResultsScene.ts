@@ -31,6 +31,8 @@ export class ResultsScene extends Phaser.Scene {
       (item) => !wishlistTextures.has(item.texture),
     );
 
+    this.add.image(500, 300, "review_star_empty").setScale(0.7);
+
     addOrderSheet(
       this,
       npc,
@@ -71,7 +73,6 @@ export class ResultsScene extends Phaser.Scene {
       () => this.replay(),
       {
         key: "X",
-        //width: 540,
         fireOn: "up",
       },
     );

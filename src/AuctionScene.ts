@@ -17,8 +17,8 @@ const BID_INCREASE = { min: 10, max: 10 };
 const BID_THRESHOLD = 1000; // spectators start bidding after this time interval
 const BID_INTERVAL = { min: 1000, max: 1200 };
 // HUD inventory: bought items fill these slots in purchase order
-const HUD_COLUMNS = 3;
-const HUD_ITEM_SIZE = 150;
+const HUD_COLUMNS = 4;
+const HUD_ITEM_SIZE = 100;
 const HUD_SLOT_PITCH = 144;
 
 const NEXT_ITEM_DELAY = 600; // pause after the hammer hits, before the next object
@@ -46,7 +46,8 @@ export class AuctionScene extends Phaser.Scene {
   private hudCenter = 0;
   private stopHints: (() => void)[] = [];
   private timer!: Phaser.Time.TimerEvent;
-  private bar!: Phaser.GameObjects.Rectangle;
+  private bar!: Phaser.GameObjects.TileSprite;
+  private bar2!: Phaser.GameObjects.Rectangle;
   private label!: Phaser.GameObjects.Text;
   private spectators: Phaser.GameObjects.Image[] = [];
   private auctioner!: Auctioner;
@@ -69,14 +70,45 @@ export class AuctionScene extends Phaser.Scene {
 
     yellowBackground.setOrigin(0, 0);
 
+    const yellowStripLeft = this.add.tileSprite(
+      this.scale.width / 3 - 40,
+      0,
+      50,
+      this.scale.height,
+      "line_yellow",
+    );
+    yellowStripLeft.tileRotation = -Math.PI / 2;
+    yellowStripLeft.setOrigin(0, 0);
+
+    const yellowStripRight = this.add.tileSprite(
+      this.scale.width / 3 + this.scale.width / 3,
+      0,
+      50,
+      this.scale.height,
+      "line_yellow",
+    );
+    yellowStripRight.tileRotation = Math.PI / 2;
+    yellowStripRight.setOrigin(0, 0);
+
     this.add
-      .rectangle(0, 0, width, TIMER_HEIGHT, COLORS.pinkpurple.hex)
+      .rectangle(0, 0, width, TIMER_HEIGHT, COLORS.darkpink.hex)
+      .setOrigin(0, 0);
+
+    const backgroundTimer = this.add
+      .tileSprite(0, 25, width, 50, "line_pink1")
+      .setOrigin(0, 0);
+    backgroundTimer.tileRotation = Math.PI;
+
+    this.bar2 = this.add
+      .rectangle(0, 0, width, TIMER_HEIGHT, COLORS.cyan.hex)
       .setOrigin(0, 0);
 
     this.bar = this.add
-      .rectangle(0, 0, width, TIMER_HEIGHT, COLORS.pink.hex)
-      .setStrokeStyle(2, COLORS.purple.hex)
+      .tileSprite(0, 25, width, TIMER_HEIGHT, "line_cyan")
       .setOrigin(0, 0);
+
+    this.bar.tileRotation = -Math.PI;
+
     this.label = this.add
       .text(15, 27, "", { ...TEXT_STYLE, fontSize: "36px", color: "black" })
       .setOrigin(0, 0.5);
@@ -129,12 +161,22 @@ export class AuctionScene extends Phaser.Scene {
 
     const yesNoContainer = this.add.rectangle(
       0,
-      this.scale.height - 126,
+      this.scale.height - 110,
       this.scale.width,
-      126,
+      110,
       COLORS.darkpink.hex,
     );
     yesNoContainer.setOrigin(0, 0);
+
+    // x, y, width, height, texture key
+    const strip = this.add.tileSprite(
+      0,
+      this.scale.height - 140,
+      this.scale.width,
+      50,
+      "line_pink1",
+    );
+    strip.setOrigin(0, 0);
 
     this.stopHints = [];
     const pressed = (action: () => void) => () => {
@@ -379,9 +421,8 @@ export class AuctionScene extends Phaser.Scene {
   private flyItemToInventory(item: Item, slot: number) {
     const x =
       this.hudCenter +
-      ((slot % HUD_COLUMNS) - (HUD_COLUMNS - 1) / 2) * HUD_SLOT_PITCH -
-      50;
-    const y = 400 + Math.floor(slot / HUD_COLUMNS) * HUD_SLOT_PITCH;
+      ((slot % HUD_COLUMNS) - (HUD_COLUMNS - 1) / 2) * HUD_SLOT_PITCH;
+    const y = 420 + Math.floor(slot / HUD_COLUMNS) * HUD_SLOT_PITCH;
     const bought = new ItemImage(
       this,
       this.itemDisplay.x,
@@ -472,6 +513,7 @@ export class AuctionScene extends Phaser.Scene {
   update() {
     const remaining = this.timer.getRemaining();
     this.bar.width = this.scale.width * (remaining / DURATION);
+    this.bar2.width = this.scale.width * (remaining / DURATION);
     this.label.setText(Math.ceil(remaining / 1000).toString());
   }
 }
