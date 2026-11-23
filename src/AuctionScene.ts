@@ -50,7 +50,6 @@ export class AuctionScene extends Phaser.Scene {
   private label!: Phaser.GameObjects.Text;
   private spectators: Phaser.GameObjects.Image[] = [];
   private auctioner!: Auctioner;
-  private starsEmitter!: Phaser.GameObjects.Particles.ParticleEmitter;
 
   constructor() {
     super("auction");
@@ -224,30 +223,6 @@ export class AuctionScene extends Phaser.Scene {
       .setOrigin(0.5);
     this.currentItem = this.deck[this.deck.length - 1]; // placeholder until presentNextItem
 
-    this.starsEmitter = this.add.particles(0, 0, "star", {
-      x: itemDisplayX,
-      y: itemDisplayY,
-      scale: { start: 0, end: 0.36 },
-      alpha: { start: 0, end: 0.7 },
-      lifespan: 2000,
-      frequency: 400,
-      emitZone: {
-        type: "random",
-        source: {
-          getRandomPoint: (point: any) => {
-            const minR = 162;
-            const maxR = 198;
-            const angle = Math.random() * Math.PI * 2;
-            const r = Math.sqrt(
-              Math.random() * (maxR * maxR - minR * minR) + minR * minR,
-            );
-            point.x = Math.cos(angle) * r;
-            point.y = Math.sin(angle) * r;
-          },
-        } as any,
-      },
-    });
-
     this.itemDisplay = new ItemImage(
       this,
       itemDisplayX,
@@ -286,7 +261,6 @@ export class AuctionScene extends Phaser.Scene {
   }
 
   private presentNextItem() {
-    this.starsEmitter.killAll();
     this.bidEvent?.remove();
     this.lostEvent?.remove();
 
