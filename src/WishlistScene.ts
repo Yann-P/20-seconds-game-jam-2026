@@ -31,7 +31,7 @@ export class WishlistScene extends Phaser.Scene {
     const { width } = this.scale;
     const wishlist = pickWishlist();
     this.registry.set("wishlist", wishlist);
-    this.registry.set("npcid", Phaser.Math.Between(1, 9));
+    this.registry.set("npcid", Phaser.Math.Between(1, 11));
 
     addOrderSheet(
       this,

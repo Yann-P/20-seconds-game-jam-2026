@@ -141,7 +141,7 @@ export class AuctionScene extends Phaser.Scene {
         .image(
           spacing * (i + 1) - 150,
           height + 50,
-          "NPC_" + Phaser.Math.Between(2, 9) + "_outline",
+          "NPC_" + Phaser.Math.Between(2, 11) + "_outline",
         )
         .setOrigin(0.5, 1)
         .setScale(Phaser.Math.FloatBetween(0.8, 0.9));

@@ -60,6 +60,8 @@ export class LoadingScene extends Phaser.Scene {
     this.load.image("NPC_7_outline", "NPC_7_outline.png");
     this.load.image("NPC_8_outline", "NPC_8_outline.png");
     this.load.image("NPC_9_outline", "NPC_9_outline.png");
+    this.load.image("NPC_10_outline", "NPC_10_outline.png");
+    this.load.image("NPC_11_outline", "NPC_11_outline.png");
     this.load.image("NPC_1", "NPC_1_frame.png");
     this.load.image("NPC_2", "NPC_2_frame.png");
     this.load.image("NPC_3", "NPC_3_frame.png");
@@ -69,6 +71,8 @@ export class LoadingScene extends Phaser.Scene {
     this.load.image("NPC_7", "NPC_7_frame.png");
     this.load.image("NPC_8", "NPC_8_frame.png");
     this.load.image("NPC_9", "NPC_9_frame.png");
+    this.load.image("NPC_10", "NPC_10_frame.png");
+    this.load.image("NPC_11", "NPC_11_frame.png");
     for (const item of ITEMS) {
       this.load.image(item.texture, `${item.texture}.png`);
     }

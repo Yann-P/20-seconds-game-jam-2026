@@ -67,7 +67,7 @@ export class ResultsScene extends Phaser.Scene {
       this,
       960,
       1080 - 230,
-      "Again?",
+      "Next",
       "press x",
       "green",
       () => this.replay(),
@@ -98,11 +98,13 @@ export class ResultsScene extends Phaser.Scene {
   }
 
   private addBoughtMark(itemImage: ItemImage, wasBought: boolean) {
-    this.add.image(
-      itemImage.x + BOUGHT_MARK_OFFSET_FROM_ITEM_CENTER,
-      itemImage.y + BOUGHT_MARK_OFFSET_FROM_ITEM_CENTER,
-      wasBought ? "mark_yes" : "mark_no",
-    );
+    this.add
+      .image(
+        itemImage.x + BOUGHT_MARK_OFFSET_FROM_ITEM_CENTER,
+        itemImage.y + BOUGHT_MARK_OFFSET_FROM_ITEM_CENTER,
+        wasBought ? "mark_yes" : "mark_no",
+      )
+      .setScale(0.7);
   }
 
   private replay() {
