@@ -31,7 +31,6 @@ export class AuctionScene extends Phaser.Scene {
   private purchased: Item[] = [];
   private itemDisplay!: ItemImage;
   private priceLabel!: Phaser.GameObjects.Text;
-  private priceLabelLabel!: Phaser.GameObjects.Text;
   private moneyLabel!: Phaser.GameObjects.Text;
   private bidEvent?: Phaser.Time.TimerEvent;
   private lostEvent?: Phaser.Time.TimerEvent;
@@ -48,7 +47,6 @@ export class AuctionScene extends Phaser.Scene {
   private timer!: Phaser.Time.TimerEvent;
   private bar!: Phaser.GameObjects.TileSprite;
   private bar2!: Phaser.GameObjects.Rectangle;
-  private label!: Phaser.GameObjects.Text;
   private spectators: Phaser.GameObjects.Image[] = [];
   private auctioner!: Auctioner;
 
@@ -109,9 +107,6 @@ export class AuctionScene extends Phaser.Scene {
 
     this.bar.tileRotation = -Math.PI;
 
-    this.label = this.add
-      .text(15, 27, "", { ...TEXT_STYLE, fontSize: "36px", color: "black" })
-      .setOrigin(0, 0.5);
     this.timer = this.time.delayedCall(DURATION, () =>
       this.scene.start("results"),
     );
@@ -218,30 +213,49 @@ export class AuctionScene extends Phaser.Scene {
       .setOrigin(0, 0.5)
       .setScale(1.5, 1.5);
 
-    const yellowBackgroundHud = this.add
-      .rectangle(
-        uiStartHud.x + 35,
-        uiStartHud.y,
-        uiStartHud.width - 53,
-        200,
-        COLORS.yellow.hex,
-      )
-      .setOrigin(0, 0.5)
-      .setScale(1.5);
-
     yellowBackground.setOrigin(0, 0);
+
+    this.add.image(750, 200, "bubble_speech").setScale(0.7);
 
     //// HUD ////
     const hudWidth = this.scale.width / 3;
     const hudCenter = sceneWidth + hudWidth / 2 - 40;
     this.moneyLabel = this.add
-      .text(hudCenter, 250, "", {
+      .text(hudCenter - 270, 190, "", {
         ...TEXT_STYLE,
         color: COLORS.pink.hexString,
         align: "left",
-        fontSize: "72px",
+        fontSize: "60px",
       })
-      .setOrigin(0.5);
+      .setOrigin(0, 0);
+
+    this.add
+      .text(hudCenter - 280, 250, "--------------------------------", {
+        ...TEXT_STYLE,
+        color: COLORS.pink.hexString,
+        align: "left",
+        fontSize: "32px",
+      })
+      .setOrigin(0, 0);
+
+    this.add
+      .text(hudCenter - 280, 700, "--------------------------------", {
+        ...TEXT_STYLE,
+        color: COLORS.pink.hexString,
+        align: "left",
+        fontSize: "32px",
+      })
+      .setOrigin(0, 0);
+
+    this.add
+      .text(hudCenter - 280, 210, "INVENTORY:", {
+        ...TEXT_STYLE,
+        color: COLORS.pink.hexString,
+        align: "left",
+        fontSize: "54px",
+      })
+      .setOrigin(0, 0);
+
     this.refreshMoney();
 
     this.hudCenter = hudCenter;
@@ -249,17 +263,11 @@ export class AuctionScene extends Phaser.Scene {
     const itemDisplayX = 960;
     const itemDisplayY = 470;
 
-    this.priceLabelLabel = this.add
-      .text(itemDisplayX, itemDisplayY - 320, "PRICE", {
-        ...TEXT_STYLE,
-        fontSize: "76px",
-      })
-      .setOrigin(0.5);
-
     // Object on sale and its price, next to the auctioner
     this.priceLabel = this.add
-      .text(itemDisplayX, itemDisplayY - 250, "", {
+      .text(itemDisplayX - 180, itemDisplayY - 275, "", {
         ...TEXT_STYLE,
+        color: COLORS.yellow.hexString,
         fontSize: "76px",
       })
       .setOrigin(0.5);
@@ -312,7 +320,6 @@ export class AuctionScene extends Phaser.Scene {
       this.finished = true;
       this.itemDisplay.setVisible(false);
       this.priceLabel.setVisible(false);
-      this.priceLabelLabel.setVisible(false);
       this.time.delayedCall(700, () => this.scene.start("results"));
       return;
     }
@@ -345,7 +352,6 @@ export class AuctionScene extends Phaser.Scene {
     });
   }
 
-  /** After a sale (to the player or a spectator): short pause on the hammer hit before the next object. */
   private presentNextItemAfterHammer() {
     this.bidEvent?.remove();
     this.lostEvent?.remove();
@@ -387,11 +393,8 @@ export class AuctionScene extends Phaser.Scene {
   private buy() {
     if (this.finished || this.waitingForNext) return;
     if (this.money < this.price) {
-      // Can't afford it: flash the money
+      // Can't afford it
       this.moneyLabel.setColor("red");
-
-      // Restart from the resting size: otherwise a new press mid-animation
-      // takes the enlarged size as its starting point and ends up stuck there.
       this.tweens.killTweensOf(this.moneyLabel);
       this.moneyLabel.setScale(1);
       this.tweens.add({
@@ -459,7 +462,7 @@ export class AuctionScene extends Phaser.Scene {
           `+ \$${increase}`,
           {
             ...TEXT_STYLE,
-            fontSize: "90px",
+            fontSize: "80px",
             fontStyle: "bold",
             stroke: COLORS.yellow.hexString,
             color: COLORS.darkpink.hexString,
@@ -467,6 +470,9 @@ export class AuctionScene extends Phaser.Scene {
           },
         )
         .setOrigin(0.5, 1);
+
+      text.setStroke(COLORS.purple.hexString, 16);
+
       this.tweens.add({
         targets: text,
         y: text.y - 54,
@@ -503,7 +509,7 @@ export class AuctionScene extends Phaser.Scene {
 
   private setPrice(price: number) {
     this.price = price;
-    this.priceLabel.setText(`$${price}`);
+    this.priceLabel.setText(`PRICE:  $${price}`);
   }
 
   private refreshMoney() {
@@ -514,6 +520,5 @@ export class AuctionScene extends Phaser.Scene {
     const remaining = this.timer.getRemaining();
     this.bar.width = this.scale.width * (remaining / DURATION);
     this.bar2.width = this.scale.width * (remaining / DURATION);
-    this.label.setText(Math.ceil(remaining / 1000).toString());
   }
 }

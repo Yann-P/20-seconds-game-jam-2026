@@ -65,8 +65,7 @@ export class Button extends Phaser.GameObjects.Container {
     this.hintLabel = new Phaser.GameObjects.Text(scene, 0, 0, hint, {
       ...TEXT_STYLE,
       fontSize: `${(fontSize * 2) / 3}px`,
-      color:
-        variant === "green" ? COLORS.pink.hexString : COLORS.cyan.hexString,
+      color: COLORS.purple.hexString,
     }).setOrigin(0.5, 0);
 
     this.add([this.image, this.label, this.hintLabel]);

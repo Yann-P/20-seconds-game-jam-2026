@@ -27,6 +27,7 @@ export class LoadingScene extends Phaser.Scene {
 
     // Images
     this.load.image("logo_nude", "logo_nude.png");
+    this.load.image("bubble_speech", "bubble_speech.png");
     this.load.image("line_pink1", "line_pink1.png");
     this.load.image("line_pink2", "line_pink2.png");
     this.load.image("line_yellow", "line_yellow.png");
