@@ -2,9 +2,6 @@ import Phaser from "phaser";
 import { ITEMS } from "./items";
 import { NPCS_JSON_FILE, NPCS_JSON_KEY } from "./npcs";
 
-const BACKGROUND_MUSIC_KEY = "background_music";
-const BACKGROUND_MUSIC_VOLUME = 0.4;
-
 export class LoadingScene extends Phaser.Scene {
   constructor() {
     super("loading");
@@ -18,7 +15,6 @@ export class LoadingScene extends Phaser.Scene {
     this.load.audio("thump", ["thump.mp3"]);
     this.load.audio("woosh", ["woosh.mp3"]);
     this.load.audio("click", ["click.mp3"]);
-    this.load.audio(BACKGROUND_MUSIC_KEY, ["monume-cyberpunk-519219.mp3"]);
 
     // Fonts
     this.load.font("whitrabt", "whitrabt.ttf", "truetype");
@@ -84,10 +80,6 @@ export class LoadingScene extends Phaser.Scene {
   }
 
   create() {
-    this.sound.play(BACKGROUND_MUSIC_KEY, {
-      volume: BACKGROUND_MUSIC_VOLUME,
-      loop: true,
-    });
     this.scene.start("wishlist");
   }
 }

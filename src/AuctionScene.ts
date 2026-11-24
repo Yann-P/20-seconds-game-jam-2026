@@ -8,7 +8,7 @@ import { Auctioner } from "./Auctioner";
 import { Button } from "./Button";
 import { COLORS, TEXT_STYLE, TIMER_HEIGHT } from "./consts";
 
-const DURATION = 2000;
+const DURATION = 20000;
 const SPECTATOR_COUNT = 7;
 
 const START_MONEY = 1000;
@@ -394,14 +394,14 @@ export class AuctionScene extends Phaser.Scene {
     if (this.finished || this.waitingForNext) return;
     if (this.money < this.price) {
       // Can't afford it
-      this.moneyLabel.setColor("red");
+      this.moneyLabel.setColor(COLORS.yellow.hexString);
       this.tweens.killTweensOf(this.moneyLabel);
       this.moneyLabel.setScale(1);
       this.tweens.add({
         targets: [this.moneyLabel],
         color: "#dd00000",
         duration: 100,
-        scale: 2,
+        scale: 1.4,
         ease: "Quad.easeInOut",
         yoyo: true,
         onComplete: () => {
